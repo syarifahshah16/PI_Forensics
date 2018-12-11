@@ -63,9 +63,10 @@ class mainNetAnalysis(wx.Frame):
             self.notebook_1_pane_1 = wx.Panel(self.notebook_1, wx.ID_ANY)
             self.list_ctrl_6 = wx.ListCtrl(self.packet_details_copy_, wx.ID_ANY, style=wx.LC_HRULES | wx.LC_REPORT | wx.LC_VRULES)
             self.packet_details_copy_pane_2 = wx.Panel(self.packet_details_copy, wx.ID_ANY)
-            self.list_ctrl_2 = wx.ListCtrl(self.packet_details_copy_pane_2, wx.ID_ANY, style=wx.LC_HRULES | wx.LC_REPORT | wx.LC_VRULES)
+            self.tsharktab = wx.TextCtrl(self.packet_details_copy_pane_2, wx.ID_ANY, "", style=wx.TE_MULTILINE | wx.TE_READONLY)
+            self.packetsList = wx.TextCtrl(self.packet_details_copy_pane_2, wx.ID_ANY, "", style=wx.TE_MULTILINE | wx.TE_READONLY)
             self.packet_details_copy_Protocol = wx.Panel(self.packet_details_copy, wx.ID_ANY)
-            self.list_ctrl_3 = wx.ListCtrl(self.packet_details_copy_Protocol, wx.ID_ANY, style=wx.LC_HRULES | wx.LC_REPORT | wx.LC_VRULES)
+            self.dnslist = wx.TextCtrl(self.packet_details_copy_Protocol, wx.ID_ANY, "", style=wx.TE_MULTILINE | wx.TE_READONLY)
             self.packet_details_copy_Credentials = wx.Panel(self.packet_details_copy, wx.ID_ANY)
             self.list_ctrl_4 = wx.ListCtrl(self.packet_details_copy_Credentials, wx.ID_ANY, style=wx.LC_HRULES | wx.LC_REPORT | wx.LC_VRULES)
             self.packet_details_copy_Keywords = wx.Panel(self.packet_details_copy, wx.ID_ANY)
@@ -109,12 +110,9 @@ class mainNetAnalysis(wx.Frame):
             self.list_ctrl_6.AppendColumn("Size ", format=wx.LIST_FORMAT_LEFT, width=100)
             self.list_ctrl_6.AppendColumn("Parent Path", format=wx.LIST_FORMAT_LEFT, width=200)
             self.list_ctrl_6.AppendColumn("Extension", format=wx.LIST_FORMAT_LEFT, width=100)
-            self.list_ctrl_2.AppendColumn("A", format=wx.LIST_FORMAT_LEFT, width=-1)
-            self.list_ctrl_2.AppendColumn("B", format=wx.LIST_FORMAT_LEFT, width=-1)
-            self.list_ctrl_2.AppendColumn("C", format=wx.LIST_FORMAT_LEFT, width=-1)
-            self.list_ctrl_3.AppendColumn("A", format=wx.LIST_FORMAT_LEFT, width=-1)
-            self.list_ctrl_3.AppendColumn("B", format=wx.LIST_FORMAT_LEFT, width=-1)
-            self.list_ctrl_3.AppendColumn("C", format=wx.LIST_FORMAT_LEFT, width=-1)
+            self.tsharktab.SetMinSize((877, 320))
+            self.packetsList.SetMinSize((877, 365))
+            self.packetsList.SetBackgroundColour(wx.Colour(211, 211, 211))
             self.list_ctrl_4.AppendColumn("Client", format=wx.LIST_FORMAT_LEFT, width=150)
             self.list_ctrl_4.AppendColumn("Server", format=wx.LIST_FORMAT_LEFT, width=150)
             self.list_ctrl_4.AppendColumn("Protocol", format=wx.LIST_FORMAT_LEFT, width=100)
@@ -145,9 +143,10 @@ class mainNetAnalysis(wx.Frame):
             sizer_3.Add(self.notebook_1, 1, wx.EXPAND, 0)
             sizer_3.Add(self.list_ctrl_6, 1, wx.ALL | wx.EXPAND, 5)
             self.packet_details_copy_.SetSizer(sizer_3)
-            sizer_4.Add(self.list_ctrl_2, 1, wx.EXPAND, 0)
+            sizer_4.Add(self.tsharktab, 0, 0, 0)
+            sizer_4.Add(self.packetsList, 0, wx.TOP, 27)
             self.packet_details_copy_pane_2.SetSizer(sizer_4)
-            sizer_5.Add(self.list_ctrl_3, 1, wx.EXPAND, 0)
+            sizer_5.Add(self.dnslist, 1, wx.EXPAND, 0)
             self.packet_details_copy_Protocol.SetSizer(sizer_5)
             sizer_6.Add(self.list_ctrl_4, 1, wx.EXPAND, 0)
             self.packet_details_copy_Credentials.SetSizer(sizer_6)
@@ -213,9 +212,26 @@ class mainNetAnalysis(wx.Frame):
  
             openFileDialog.ShowModal()                      
             global caseDbPath
-            caseDbPath  = openFileDialog.GetPath()                              #get path selected in filedialog
+            caseDbPath  = openFileDialog.GetPath()
 
-      def on_menu_File_Exit(self, event):  # wxGlade: mainNetAnalysis.<event_handler>
+            """try:
+                  process = Popen(['sudo', 'tshark', '-r', openFileDialog], stdout=PIPE, stderr=PIPE)
+                  stdout, stderr = process.communicate()
+                  self.tsharktab.SetValue(stdout)
+
+                  process = Popen(['sudo', 'tcpdump', '-qns', '0', '-x', '-r', openFileDialog], stdout=PIPE, stderr=PIPE)
+                  stdout, stderr = process.communicate()
+                  self.packetsList.SetValue(stdout)                             #get path selected in filedialog
+            except:
+                  print("Could not be opened")  """                                                          #ignore if try: fails
+            openFileDialog.Destroy()
+
+
+
+
+
+
+      def on_menu_File_Exit(self, event):  
             self.Close()
             self.Destroy()
 
