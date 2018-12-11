@@ -54,6 +54,8 @@ class mainNetAnalysis(wx.Frame):
             self.SetToolBar(self.mainNetAnalysis_toolbar)
             # Tool Bar end
             self.packet_details_copy = wx.Notebook(self, wx.ID_ANY)
+            self.packet_details_copy_PCAPSummary = wx.Panel(self.packet_details_copy, wx.ID_ANY)
+            self.packet_details_copy_File = wx.Panel(self.packet_details_copy, wx.ID_ANY)
             self.notebook_1_pane_2 = wx.Panel(self.packet_details_copy, wx.ID_ANY)
             self.list_ctrl_1 = wx.ListCtrl(self.notebook_1_pane_2, wx.ID_ANY, style=wx.LC_HRULES | wx.LC_REPORT | wx.LC_VRULES)
             self.packet_details_copy_ = wx.Panel(self.packet_details_copy, wx.ID_ANY)
@@ -157,6 +159,7 @@ class mainNetAnalysis(wx.Frame):
             sizer_7.Add(self.list_ctrl_5, 1, wx.EXPAND, 0)
             sizer_7.Add(self.panel_1, 1, wx.EXPAND, 0)
             self.packet_details_copy_Keywords.SetSizer(sizer_7)
+            self.packet_details_copy.AddPage(self.packet_details_copy_PCAPSummary, "PCAP Summary")
             self.packet_details_copy.AddPage(self.notebook_1_pane_2, "File")
             self.packet_details_copy.AddPage(self.packet_details_copy_, "Images")
             self.packet_details_copy.AddPage(self.packet_details_copy_pane_2, "Sessions")
@@ -218,7 +221,6 @@ class mainNetAnalysis(wx.Frame):
                   process = Popen(['sudo', 'tshark', '-r', openFileDialog], stdout=PIPE, stderr=PIPE)
                   stdout, stderr = process.communicate()
                   self.tsharktab.SetValue(stdout)
-
                   process = Popen(['sudo', 'tcpdump', '-qns', '0', '-x', '-r', openFileDialog], stdout=PIPE, stderr=PIPE)
                   stdout, stderr = process.communicate()
                   self.packetsList.SetValue(stdout)                             #get path selected in filedialog
