@@ -5,6 +5,14 @@
 #
 
 import wx
+import os
+import NewCaseDialog
+import connectdb
+import subprocess
+import sqlite3
+from sqlite3 import Error
+from pathlib import Path
+import datetime, time
 
 # begin wxGlade: dependencies
 # end wxGlade
@@ -14,10 +22,9 @@ import wx
 
 
 class mainNetAnalysis(wx.Frame):
-      def __init__(self, *args, **kwds):
+      def __init__(self, parent):
             # begin wxGlade: mainNetAnalysis.__init__
-            kwds["style"] = kwds.get("style", 0) | wx.DEFAULT_FRAME_STYLE
-            wx.Frame.__init__(self, *args, **kwds)
+            wx.Frame.__init__(self, parent=parent)
             self.SetSize((879, 788))
             
             # Menu Bar
@@ -147,74 +154,97 @@ class mainNetAnalysis(wx.Frame):
             sizer_13 = wx.BoxSizer(wx.HORIZONTAL)
             sizer_12 = wx.BoxSizer(wx.HORIZONTAL)
             sizer_14 = wx.BoxSizer(wx.HORIZONTAL)
-            label_1 = wx.StaticText(self.packet_details_copy_PCAPSummary, wx.ID_ANY, "Analysis File Extracted:")
-            label_1.SetMinSize((250, 21))
-            label_1.SetFont(wx.Font(12, wx.DEFAULT, wx.NORMAL, wx.BOLD, 0, ""))
-            sizer_14.Add(label_1, 0, wx.ALL, 0)
-            label_12 = wx.StaticText(self.packet_details_copy_PCAPSummary, wx.ID_ANY, "0")
-            sizer_14.Add(label_12, 0, 0, 0)
+
+            lbl_fileExtracted = wx.StaticText(self.packet_details_copy_PCAPSummary, wx.ID_ANY, "Analysis File Extracted:")
+            lbl_fileExtracted.SetMinSize((250, 21))
+            lbl_fileExtracted.SetFont(wx.Font(12, wx.DEFAULT, wx.NORMAL, wx.BOLD, 0, ""))
+            sizer_14.Add(lbl_fileExtracted, 0, wx.ALL, 0)
+
+            lbl_evidenceCount = wx.StaticText(self.packet_details_copy_PCAPSummary, wx.ID_ANY, "0")
+            sizer_14.Add(lbl_evidenceCount, 0, 0, 0)
             sizer_10.Add(sizer_14, 1, wx.EXPAND, 0)
-            label_2 = wx.StaticText(self.packet_details_copy_PCAPSummary, wx.ID_ANY, "MD5 Hash Value:")
-            label_2.SetMinSize((250, 21))
-            sizer_12.Add(label_2, 0, wx.ALL, 0)
-            label_13 = wx.StaticText(self.packet_details_copy_PCAPSummary, wx.ID_ANY, "\n")
-            sizer_12.Add(label_13, 0, 0, 0)
+
+            lbl_md5 = wx.StaticText(self.packet_details_copy_PCAPSummary, wx.ID_ANY, "MD5 Hash Value:")
+            lbl_md5.SetMinSize((250, 21))
+            sizer_12.Add(lbl_md5, 0, wx.ALL, 0)
+
+            lbl_outputMD5 = wx.StaticText(self.packet_details_copy_PCAPSummary, wx.ID_ANY, "\n")
+            sizer_12.Add(lbl_outputMD5, 0, 0, 0)
             sizer_10.Add(sizer_12, 1, wx.EXPAND, 0)
-            label_3 = wx.StaticText(self.packet_details_copy_PCAPSummary, wx.ID_ANY, "File Size:")
-            label_3.SetMinSize((250, 21))
-            sizer_13.Add(label_3, 0, 0, 0)
-            label_14 = wx.StaticText(self.packet_details_copy_PCAPSummary, wx.ID_ANY, "\n")
-            sizer_13.Add(label_14, 0, 0, 0)
+
+            lbl_fileSize = wx.StaticText(self.packet_details_copy_PCAPSummary, wx.ID_ANY, "File Size:")
+            lbl_fileSize.SetMinSize((250, 21))
+            sizer_13.Add(lbl_fileSize, 0, 0, 0)
+
+            lbl_outputFileSize = wx.StaticText(self.packet_details_copy_PCAPSummary, wx.ID_ANY, "\n")
+            sizer_13.Add(lbl_outputFileSize, 0, 0, 0)
             sizer_10.Add(sizer_13, 1, wx.EXPAND, 0)
-            label_4 = wx.StaticText(self.packet_details_copy_PCAPSummary, wx.ID_ANY, "Date-time Added:")
-            label_4.SetMinSize((250, 21))
-            sizer_11.Add(label_4, 0, 0, 0)
-            label_15 = wx.StaticText(self.packet_details_copy_PCAPSummary, wx.ID_ANY, "\n")
-            sizer_11.Add(label_15, 0, 0, 0)
+
+            lbl_datetime = wx.StaticText(self.packet_details_copy_PCAPSummary, wx.ID_ANY, "Date-time Added:")
+            lbl_datetime.SetMinSize((250, 21))
+            sizer_11.Add(lbl_datetime, 0, 0, 0)
+
+            lbl_outputDateTime = wx.StaticText(self.packet_details_copy_PCAPSummary, wx.ID_ANY, "\n")
+            sizer_11.Add(lbl_outputDateTime, 0, 0, 0)
             sizer_10.Add(sizer_11, 1, wx.EXPAND, 0)
-            label_5 = wx.StaticText(self.packet_details_copy_PCAPSummary, wx.ID_ANY, "Case Info")
-            label_5.SetMinSize((250, 21))
-            label_5.SetFont(wx.Font(12, wx.DEFAULT, wx.NORMAL, wx.BOLD, 0, ""))
-            sizer_15.Add(label_5, 0, wx.ALL | wx.EXPAND, 0)
-            label_16 = wx.StaticText(self.packet_details_copy_PCAPSummary, wx.ID_ANY, "\n")
-            sizer_15.Add(label_16, 0, 0, 0)
+
+            lbl_caseInfo = wx.StaticText(self.packet_details_copy_PCAPSummary, wx.ID_ANY, "Case Info")
+            lbl_caseInfo.SetMinSize((250, 21))
+            lbl_caseInfo.SetFont(wx.Font(12, wx.DEFAULT, wx.NORMAL, wx.BOLD, 0, ""))
+            sizer_15.Add(lbl_caseInfo, 0, wx.ALL | wx.EXPAND, 0)
+
+            lbl_outputEmpty = wx.StaticText(self.packet_details_copy_PCAPSummary, wx.ID_ANY, "\n")
+            sizer_15.Add(lbl_outputEmpty, 0, 0, 0)
             sizer_10.Add(sizer_15, 1, wx.EXPAND, 0)
-            label_6 = wx.StaticText(self.packet_details_copy_PCAPSummary, wx.ID_ANY, "Investigator Name:")
-            label_6.SetMinSize((250, 21))
-            sizer_16.Add(label_6, 0, 0, 0)
-            label_17 = wx.StaticText(self.packet_details_copy_PCAPSummary, wx.ID_ANY, "\n")
-            sizer_16.Add(label_17, 0, 0, 0)
+
+            lbl_investigator = wx.StaticText(self.packet_details_copy_PCAPSummary, wx.ID_ANY, "Investigator Name:")
+            lbl_investigator.SetMinSize((250, 21))
+            sizer_16.Add(lbl_investigator, 0, 0, 0)
+
+            lbl_outputInvestigator = wx.StaticText(self.packet_details_copy_PCAPSummary, wx.ID_ANY, "\n")
+            sizer_16.Add(lbl_outputInvestigator, 0, 0, 0)
             sizer_10.Add(sizer_16, 1, wx.EXPAND, 0)
-            label_7 = wx.StaticText(self.packet_details_copy_PCAPSummary, wx.ID_ANY, "Case Number:")
-            label_7.SetMinSize((250, 21))
-            sizer_17.Add(label_7, 0, 0, 0)
-            label_18 = wx.StaticText(self.packet_details_copy_PCAPSummary, wx.ID_ANY, "\n")
-            sizer_17.Add(label_18, 0, 0, 0)
+
+            lbl_caseNo = wx.StaticText(self.packet_details_copy_PCAPSummary, wx.ID_ANY, "Case Number:")
+            lbl_caseNo.SetMinSize((250, 21))
+            sizer_17.Add(lbl_caseNo, 0, 0, 0)
+
+            lbl_outputCaseNo = wx.StaticText(self.packet_details_copy_PCAPSummary, wx.ID_ANY, "\n")
+            sizer_17.Add(lbl_outputCaseNo, 0, 0, 0)
             sizer_10.Add(sizer_17, 1, wx.EXPAND, 0)
-            label_8 = wx.StaticText(self.packet_details_copy_PCAPSummary, wx.ID_ANY, "Case Name:")
-            label_8.SetMinSize((250, 21))
-            sizer_18.Add(label_8, 0, 0, 0)
-            label_19 = wx.StaticText(self.packet_details_copy_PCAPSummary, wx.ID_ANY, "\n")
-            sizer_18.Add(label_19, 0, 0, 0)
+
+            lbl_caseName = wx.StaticText(self.packet_details_copy_PCAPSummary, wx.ID_ANY, "Case Name:")
+            lbl_caseName.SetMinSize((250, 21))
+            sizer_18.Add(lbl_caseName, 0, 0, 0)
+
+            lbl_outputCaseName = wx.StaticText(self.packet_details_copy_PCAPSummary, wx.ID_ANY, "\n")
+            sizer_18.Add(lbl_outputCaseName, 0, 0, 0)
             sizer_10.Add(sizer_18, 1, wx.EXPAND, 0)
-            label_9 = wx.StaticText(self.packet_details_copy_PCAPSummary, wx.ID_ANY, "Date-time Added:")
-            label_9.SetMinSize((250, 21))
-            sizer_19.Add(label_9, 0, 0, 0)
-            label_20 = wx.StaticText(self.packet_details_copy_PCAPSummary, wx.ID_ANY, "\n")
-            sizer_19.Add(label_20, 0, 0, 0)
+
+            lbl_datetime2 = wx.StaticText(self.packet_details_copy_PCAPSummary, wx.ID_ANY, "Date-time Added:")
+            lbl_datetime2.SetMinSize((250, 21))
+            sizer_19.Add(lbl_datetime2, 0, 0, 0)
+
+            lbl_outputDateTime2 = wx.StaticText(self.packet_details_copy_PCAPSummary, wx.ID_ANY, "\n")
+            sizer_19.Add(lbl_outputDateTime2, 0, 0, 0)
             sizer_10.Add(sizer_19, 1, wx.EXPAND, 0)
-            label_10 = wx.StaticText(self.packet_details_copy_PCAPSummary, wx.ID_ANY, "Case Database:")
-            label_10.SetMinSize((250, 21))
-            sizer_20.Add(label_10, 0, 0, 0)
+
+            lbl_caseDB = wx.StaticText(self.packet_details_copy_PCAPSummary, wx.ID_ANY, "Case Database:")
+            lbl_caseDB.SetMinSize((250, 21))
+            sizer_20.Add(lbl_caseDB, 0, 0, 0)
+
             label_21 = wx.StaticText(self.packet_details_copy_PCAPSummary, wx.ID_ANY, "\n")
             sizer_20.Add(label_21, 0, 0, 0)
             sizer_10.Add(sizer_20, 1, wx.EXPAND, 0)
-            label_11 = wx.StaticText(self.packet_details_copy_PCAPSummary, wx.ID_ANY, "Case Description:")
-            label_11.SetMinSize((250, 21))
-            sizer_21.Add(label_11, 0, 0, 0)
+
+            lbl_caseDesc = wx.StaticText(self.packet_details_copy_PCAPSummary, wx.ID_ANY, "Case Description:")
+            lbl_caseDesc.SetMinSize((250, 21))
+            sizer_21.Add(lbl_caseDesc, 0, 0, 0)
+
             label_22 = wx.StaticText(self.packet_details_copy_PCAPSummary, wx.ID_ANY, "\n")
             sizer_21.Add(label_22, 0, 0, 0)
             sizer_10.Add(sizer_21, 1, wx.EXPAND, 0)
+
             self.packet_details_copy_PCAPSummary.SetSizer(sizer_10)
             sizer_2.Add(self.list_ctrl_1, 1, wx.EXPAND, 0)
             self.packet_details_copy_File.SetSizer(sizer_2)
@@ -246,6 +276,7 @@ class mainNetAnalysis(wx.Frame):
             self.packet_details_copy.AddPage(self.packet_details_copy_Credentials, "Credentials")
             self.packet_details_copy.AddPage(self.packet_details_copy_Keywords, "Keywords")
             sizer_1.Add(self.packet_details_copy, 1, wx.EXPAND, 0)
+
             self.SetSizer(sizer_1)
             self.Layout()
             self.Centre()
@@ -303,7 +334,7 @@ class mainNetAnalysis(wx.Frame):
 
 class MyApp(wx.App):
       def OnInit(self):
-            self.mainNetAnalysis = mainNetAnalysis(None, wx.ID_ANY, "")
+            self.mainNetAnalysis = mainNetAnalysis(None)
             self.SetTopWindow(self.mainNetAnalysis)
             self.mainNetAnalysis.Show()
             return True
