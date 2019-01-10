@@ -67,8 +67,6 @@ class mainFrame(wx.Frame):
         wxglade_tmp_menu = wx.Menu()
         item = wxglade_tmp_menu.Append(wx.ID_ANY, "Clear GUI", "")
         self.Bind(wx.EVT_MENU, self.onClearGUI, id=item.GetId())
-        item = wxglade_tmp_menu.Append(wx.ID_ANY, "Delete Data", "")
-        self.Bind(wx.EVT_MENU, self.onDeleteData, id=item.GetId())
 
         self.frame_menubar.Append(wxglade_tmp_menu, "Tools")
         self.SetMenuBar(self.frame_menubar)
@@ -148,7 +146,6 @@ class mainFrame(wx.Frame):
         self.tree_ctrl_1.AppendItem(root, "Images")
         self.tree_ctrl_1.AppendItem(root, "Sessions")
         self.tree_ctrl_1.AppendItem(root, "DNS")
-        self.tree_ctrl_1.AppendItem(root, "Credentials")
 
         self.tree_ctrl_1.ExpandAll()
         self.tree_ctrl_1.Thaw()
@@ -469,19 +466,20 @@ class mainFrame(wx.Frame):
             LoadingDialog.endLoadingDialog(self)
             
             #sequence = [frameNumber, evidencePath, src_host_str, src_port, dst_host_str, dst_port, protocol, fileName, ext, size, timestamp]
-            window = self.auiNotebook.GetPage(self.auiNotebook.GetPageCount() - 1) 
+            window = self.auiNotebook.GetPage(self.auiNotebook.GetPageCount() - 1) # we've just added a page so the page we want to access is the last one
             sequence = [1, "2", "3", "4", "5", "6", "7", "8", "9", "10", "11"]
             pcapFilesTab.TabPanel.addPcapDetails(window, sequence)
             
-            #Get the PCAP data from the database and display in the GUI (File tab)
+            # Get the PCAP data from the database and display in the GUI (File tab)
             index = 1
             while (True):
                 row = connectdb.selectPcapEvidenceDetails(self.conn, index)
                 if ( () == row or None == row ):
-                    break #from while-loop (no more data)
+                    break # from while-loop (no more data)
                     
                 pcapFilesTab.TabPanel.addPcapDetails(window, row)
                 index = index + 1
+
 
         if tabName == "Images":
             self._dialog = wx.ProgressDialog("Loading", "Loading {tabName}".format(tabName=tabName), 100)  #create loading dialog
@@ -492,14 +490,14 @@ class mainFrame(wx.Frame):
         if tabName == "Sessions":
             self._dialog = wx.ProgressDialog("Loading", "Loading {tabName}".format(tabName=tabName), 100)  #create loading dialog
             LoadingDialog(self._dialog)                                                                    #start loading 
-            self.auiNotebook.AddPage(pcapSessionsTab.TabPanel(self.auiNotebook, tabName, caseDir), tabName, False, wx.NullBitmap) 
-            LoadingDialog.endLoadingDialog(self)    
+            self.auiNotebook.AddPage(pcapSessionsTab.TabPanel(self.auiNotebook, caseDir), tabName, False, wx.NullBitmap) 
+            LoadingDialog.endLoadingDialog(self)
 
         if tabName == "DNS":
             self._dialog = wx.ProgressDialog("Loading", "Loading {tabName}".format(tabName=tabName), 100)  #create loading dialog
             LoadingDialog(self._dialog)                                                                    #start loading 
-            self.auiNotebook.AddPage(pcapDNSTab.TabPanel(self.auiNotebook, tabName, caseDir), tabName, False, wx.NullBitmap) 
-            LoadingDialog.endLoadingDialog(self)    
+            self.auiNotebook.AddPage(pcapDNSTab.TabPanel(self.auiNotebook, caseDir), tabName, False, wx.NullBitmap) 
+            LoadingDialog.endLoadingDialog(self) 
 
         if tabName == "Bookmarks":
             self._dialog = wx.ProgressDialog("Loading", "Loading {tabName}".format(tabName=tabName), 100)
