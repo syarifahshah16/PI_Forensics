@@ -7,14 +7,16 @@ import subprocess
 import os      
 import re
 import sys
+import wx.dataview
 
 #from subprocess import Popen, PIPE
 
 class TabPanel(wx.Panel):
-    def __init__(self, parent):
+    def __init__(self, parent, caseDir):
         # begin wxGlade: MyFrame.__init__
         wx.Panel.__init__(self, parent=parent)
-        self.sessionslist = wx.ListCtrl(self, wx.ID_ANY, style=wx.LC_HRULES | wx.LC_REPORT | wx.LC_SINGLE_SEL | wx.LC_VRULES)
+        self.pcaplist = wx.dataview.DataViewListCtrl(self, wx.ID_ANY)
+        
 
         self.__set_properties()
         self.__do_layout()
@@ -22,28 +24,26 @@ class TabPanel(wx.Panel):
 
     def __set_properties(self):
         # begin wxGlade: MyDialog.__set_properties
-        self.sessionslist.SetMinSize((800, 800))
-        self.sessionslist.AppendColumn("Packet", format=wx.LIST_FORMAT_LEFT, width=70)
-        self.sessionslist.AppendColumn("Time", format=wx.LIST_FORMAT_LEFT, width=200)
-        self.sessionslist.AppendColumn("Source", format=wx.LIST_FORMAT_LEFT, width=193)
-        self.sessionslist.AppendColumn("Destination", format=wx.LIST_FORMAT_LEFT, width=193)
-        self.sessionslist.AppendColumn("HTTP Request", format=wx.LIST_FORMAT_LEFT, width=wx.LIST_AUTOSIZE)
-        """self.dnslist.AppendColumn("DNS", format=wx.LIST_FORMAT_LEFT, width=185)
-        self.dnslist.AppendColumn("IP Response", format=wx.LIST_FORMAT_LEFT, width=193)
-        self.dnslist.AppendColumn("Protocol", format=wx.LIST_FORMAT_LEFT, width=193)"""
+        self.pcaplist.SetMinSize((800, 800))
+        self.pcaplist.AppendTextColumn("Packet", width=70)
+        self.pcaplist.AppendTextColumn("Time", width=200)
+        self.pcaplist.AppendTextColumn("Source", width=193)
+        self.pcaplist.AppendTextColumn("Destination", width=193)
+        self.pcaplist.AppendTextColumn("HTTP Request", width=wx.LIST_AUTOSIZE)
+
         # end wxGlade/
 
     def __do_layout(self):
         # begin wxGlade: MyDialog.__do_layout
         sizer_2 = wx.BoxSizer(wx.VERTICAL)
-        sizer_2.Add(self.sessionslist, 0, wx.EXPAND, 0)
+        sizer_2.Add(self.pcaplist, 0, wx.EXPAND, 0)
         self.SetSizer(sizer_2)
         sizer_2.Fit(self)
         self.Layout()
         # end wxGlade
 
     def addSessionsDetails(self, sequence):
-        self.sessionslist.Append(sequence)
+        self.pcaplist.AppendItem(sequence)
 
 
     """def addPacketDetails(self, sequence, evidencePath):                  
