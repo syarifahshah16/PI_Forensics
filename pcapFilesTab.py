@@ -50,4 +50,4 @@ class TabPanel(wx.Panel):
         else:
             #print("addPcapDetauls: ", sequence)
             self.list_ctrl_1.Append(sequence)
-        
+   
