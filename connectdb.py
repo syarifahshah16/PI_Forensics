@@ -133,29 +133,24 @@ def search_file_name(conn, search):
     return rows 
 
 
-def createFileEvidenceTable(conn):
+def createPcapEvidenceTable(conn):
     try:
-        #get cursor object
-        cursor = conn.cursor() 
-        cursor.execute('''CREATE TABLE fileEvidenceTable(id INTEGER PRIMARY KEY, frameNum INTEGER, filePath TEXT, srcHost TEXT, srcPort TEXT, dstHost TEXT, dstPort TEXT, protocol TEXT, filename TEXT, ext TEXT, size TEXT, timestamp TEXT)''')
+        cursor = conn.cursor() # Get a cursor object
+        cursor.execute('''CREATE TABLE pcapEvidenceTable(id INTEGER PRIMARY KEY, frameNum INTEGER, filePath TEXT, srcHost TEXT, srcPort TEXT, dstHost TEXT, dstPort TEXT, protocol TEXT, filename TEXT, ext TEXT, size TEXT, timestamp TEXT)''')
         conn.commit()
         
     except Error as e:
         print(e)
 
-def insertFileEvidenceDetails(conn, frameNum, filePath, srcHost, srcPort, dstHost, dstPort, protocol, filename, ext, size, timestamp):
+def insertPcapEvidenceDetails(conn, frameNum, filePath, srcHost, srcPort, dstHost, dstPort, protocol, filename, ext, size, timestamp):
     cursor = conn.cursor()
-    cursor.execute('''INSERT INTO fileEvidenceTable(frameNum, filePath, srcHost, srcPort, dstHost, dstPort, protocol, filename, ext, size, timestamp) VALUES(?,?,?,?,?,?,?,?,?,?,?)''',
+    cursor.execute('''INSERT INTO pcapEvidenceTable(frameNum, filePath, srcHost, srcPort, dstHost, dstPort, protocol, filename, ext, size, timestamp) VALUES(?,?,?,?,?,?,?,?,?,?,?)''',
                    (frameNum, filePath, srcHost, srcPort, dstHost, dstPort, protocol, filename, ext, size, timestamp))
     
     conn.commit()
 
-def selectFileEvidenceDetails(conn, id):
+def selectPcapEvidenceDetails(conn, id):
     cursor = conn.cursor()
-    cursor.execute('''SELECT frameNum, filePath, srcHost, srcPort, dstHost, dstPort, protocol, filename, ext, size, timestamp FROM fileEvidenceTable WHERE id=?''', (id,)) 
+    cursor.execute('''SELECT frameNum, filePath, srcHost, srcPort, dstHost, dstPort, protocol, filename, ext, size, timestamp FROM pcapEvidenceTable WHERE id=?''', (id,)) # note trailing comma as we're passing a tuple with a single value
     row = cursor.fetchone()
     return row
-
-    
-    
-    
