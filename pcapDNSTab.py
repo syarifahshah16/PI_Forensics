@@ -10,6 +10,7 @@ import os
 import sqlite3
 from sqlite3 import Error
 from subprocess import Popen, PIPE
+import wx.dataview
 
 # begin wxGlade: dependencies
 # end wxGlade
@@ -20,18 +21,22 @@ style=wx.BORDER_NONE
 
 
 class TabPanel(wx.Panel):
-    def __init__(self, parent, caseDetails, evidenceDetails):
+    def __init__(self, parent, caseDir):
         # begin wxGlade: MyFrame.__init__
         wx.Panel.__init__(self, parent=parent)
-        self.dnslist = wx.TextCtrl(self, wx.ID_ANY, "", style=wx.TE_MULTILINE | wx.TE_READONLY)
+        global dnslist
+        self.dnslist = wx.dataview.DataViewListCtrl(self, wx.ID_ANY)
         
+
         self.__set_properties()
         self.__do_layout()
         # end wxGlade
 
     def __set_properties(self):
         # begin wxGlade: MyDialog.__set_properties
-        self.dnslist.SetBackgroundColour(wx.Colour(211, 211, 211))
+        self.dnslist.AppendTextColumn("DNS", width=193)
+        self.dnslist.AppendTextColumn("IP Response", width=193)
+        self.dnslist.AppendTextColumn("Protocol", width=193)
         # end wxGlade
 
     def __do_layout(self):
@@ -41,6 +46,9 @@ class TabPanel(wx.Panel):
         self.SetSizer(sizer_2)
         self.Layout()
         # end wxGlade
+
+    def addDNSDetails(self, row2):
+        self.dnslist.AppendItem(row2)
 
 
 # end of class TabPanel
