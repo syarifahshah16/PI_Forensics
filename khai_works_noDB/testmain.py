@@ -340,7 +340,7 @@ class mainFrame(wx.Frame):
         if tabName == "DNS":
             self._dialog = wx.ProgressDialog("Loading", "Loading {tabName}".format(tabName=tabName), 100)  #create loading dialog
             LoadingDialog(self._dialog)                                                                    #start loading 
-            self.auiNotebook.AddPage(DNSTab.TabPanel(self.auiNotebook, tabName, caseDir), tabName, False, wx.NullBitmap) #calls and open a aui tab from DeletedFilesTab.py
+            self.auiNotebook.AddPage(pcapDNSTab.TabPanel(self.auiNotebook, tabName, caseDir), tabName, False, wx.NullBitmap) #calls and open a aui tab from DeletedFilesTab.py
             LoadingDialog.endLoadingDialog(self)    
 
         if tabName == "Credentials":
