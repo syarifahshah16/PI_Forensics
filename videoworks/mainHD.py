@@ -134,25 +134,33 @@ class mainFrame(wx.Frame):
         for x in caseDetails:
             caseName = str(x[2]) + "_" + x[3]
 
-        root = self.tree_ctrl_1.AddRoot(caseName)                                   #adds the name of case as root item in treectrl
+        #adds the name of case as root item in treectrl    
+        root = self.tree_ctrl_1.AddRoot(caseName)                                   
         summary = self.tree_ctrl_1.AppendItem(root, "Summary")
         
-        
-        conn = connectdb.create_connection(caseDbFile)                              #connect to case database
-        evidenceInfo = connectdb.select_evidence_details(conn)                      #get evidenceName, EvidenceDbPath EvidenceDatetime and Md5 from case database
-                                                                                    #EvidenceDbPath = path to tsk database generated when onAddEvidence is called
+        #connect to case database
+        conn = connectdb.create_connection(caseDbFile)                              
+        #get evidenceName, EvidenceDbPath EvidenceDatetime and Md5 from case database
+        #EvidenceDbPath = path to tsk database generated when onAddEvidence is called
+        evidenceInfo = connectdb.select_evidence_details(conn)                      
+                                                                                    
         for x in evidenceInfo:                    
-            evidenceDbConn = connectdb.create_connection(x[2])                      #connect to tsk database
-            evidenceDbInfo = connectdb.select_image_info(evidenceDbConn)            #get evidence name, size and md5 from tsk database
-            evidencePart  = connectdb.select_image_partitions(evidenceDbConn)       #get partition info from tsk database
+            #connect to tsk database
+            evidenceDbConn = connectdb.create_connection(x[2])                      
+            #get evidence name, size and md5 from tsk database
+            evidenceDbInfo = connectdb.select_image_info(evidenceDbConn)            
+            #get partition info from tsk database
+            evidencePart  = connectdb.select_image_partitions(evidenceDbConn)       
             count = 0
             for i in evidenceDbInfo:
                 fileName = os.path.basename(i[0])
-                temp = self.tree_ctrl_1.AppendItem(summary, fileName)               #append evidence name to treectrl
+                #append evidence name to treectrl
+                temp = self.tree_ctrl_1.AppendItem(summary, fileName)               
                 for i in evidencePart:                                              
                     i = list(i)
                     count += 1 
-                    self.tree_ctrl_1.AppendItem(temp, "Vol{count} {desc}: {start}-{end})".format(count=count, desc=str(i[2]), start=str(i[0]), end=str(i[1])))  #append evidence partition to evidence name
+                    #append evidence partition to evidence name
+                    self.tree_ctrl_1.AppendItem(temp, "Vol{count} {desc}: {start}-{end})".format(count=count, desc=str(i[2]), start=str(i[0]), end=str(i[1])))  
 
         self.tree_ctrl_1.AppendItem(summary, "Timeline")
         self.tree_ctrl_1.AppendItem(summary, "Bookmarks")
@@ -171,7 +179,9 @@ class mainFrame(wx.Frame):
         self.tree_ctrl_1.ExpandAll()
         self.tree_ctrl_1.Thaw()
 
-    #menu functions
+    #--------------------#
+    #   Menu Functions   #
+    #--------------------#
     def onNewCase(self, event):  
         dialog = NewCaseDialog.newCase(None)
         dialog.Center()
@@ -180,65 +190,82 @@ class mainFrame(wx.Frame):
         
         global caseDetails
         try:
-            conn = connectdb.create_connection(dbPath)                      #connects to new case database
-            caseDetails = connectdb.select_case_details(conn)               #get InvestigatorName, CaseNum, CaseName, CaseFolder, CaseDb, CaseDesc, Datatime from case database
-            self.recreateTree(dbPath)                                       #creates treectrl
+            #connects to new case database
+            conn = connectdb.create_connection(dbPath)                      
+            #get InvestigatorName, CaseNum, CaseName, CaseFolder, CaseDb, CaseDesc, Datatime from case database
+            caseDetails = connectdb.select_case_details(conn)               
+            #creates treectrl
+            self.recreateTree(dbPath)                                       
         except:
             pass 
-        
         dialog.Destroy()
         
-
     def onOpenCase(self, event):  
-        openFileDialog = wx.FileDialog(self, "Open", "", "","*.db",         #creates a filedialog that only allow user to select .db files
+        #creates a filedialog that only allow user to select .db files
+        openFileDialog = wx.FileDialog(self, "Open", "", "","*.db",         
                                        wx.FD_OPEN | wx.FD_FILE_MUST_EXIST) 
  
         openFileDialog.ShowModal()                      
         global caseDbPath
-        caseDbPath  = openFileDialog.GetPath()                              #get path selected in filedialog
+        #get path selected in filedialog
+        caseDbPath  = openFileDialog.GetPath()                              
         
         global caseDetails, evidenceDetails
         try:
-            conn = connectdb.create_connection(caseDbPath)                  #try to connect to case database and get case and evidence details
+            #try to connect to case database and get case and evidence details
+            conn = connectdb.create_connection(caseDbPath)                  
             caseDetails = connectdb.select_case_details(conn)
-            evidenceDetails = connectdb.select_evidence_details(conn)       #get EvidenceName, EvidenceDbPath, EvidenceDatatime and Md5 from case database
-            self.addAuiTab("Summary", evidenceDetails)                      #opens summary page 
+            #get EvidenceName, EvidenceDbPath, EvidenceDatatime and Md5 from case database
+            evidenceDetails = connectdb.select_evidence_details(conn)       
+            #opens summary page 
+            self.addAuiTab("Summary", evidenceDetails)                      
             openTabs.append("Summary")                          
             self.recreateTree(caseDbPath)
         except:
-            pass                                                            #ignore if try: fails
+            #ignore if try: fails
+            pass                                                            
         openFileDialog.Destroy()
-
-   
+        
     def onAddEvidence(self, event):
         try:
             caseDetails                                                     
-        except NameError:                                                   #if caseDetails not defined
+        #if caseDetails not defined    
+        except NameError:                                                   
             print("Case not opened")                                        
-        else:                                                               #if caseDetails is defined
-            openFileDialog = wx.FileDialog(self, "Open", "", "","*.dd",     #creates a filedialog that only allow user to select .dd files 
+        #if caseDetails is defined
+        else:                                                               
+            #creates a filedialog that only allow user to select .dd files 
+            openFileDialog = wx.FileDialog(self, "Open", "", "","*.dd",     
                                         wx.FD_OPEN | wx.FD_FILE_MUST_EXIST)
     
             openFileDialog.ShowModal()                         
             global caseDir, caseDbPath                                   
-            evidencePath = openFileDialog.GetPath()                         #get path of selected dd file
+            #get path of selected dd file
+            evidencePath = openFileDialog.GetPath()                         
             fileName = os.path.basename(evidencePath)
             
-        
             for x in caseDetails:
-                caseDir = x[4]                                              #get case directory from caseDetails
-                caseDbPath = x[5]                                           #get case database path from caseDetails
+                #get case directory from caseDetails
+                caseDir = x[4]                                              
+                #get case database path from caseDetails
+                caseDbPath = x[5]                                           
 
             evidenceDbDir = Path(caseDir+"/Evidence_Database")
-            if evidenceDbDir.is_dir() == False:                             #check if directory exist
-                os.mkdir(str(evidenceDbDir))                                #create directory if it does not exist
+            #check if directory exist
+            if evidenceDbDir.is_dir() == False:                             
+                #create directory if it does not exist
+                os.mkdir(str(evidenceDbDir))                                
             if fileName != "":
-                self._dialog = wx.ProgressDialog("Adding evidence", "Creating database for '{s}'".format(s=fileName), 100) 
-                LoadingDialog(self._dialog)                                 #starts the loading dialog
-                load_db = subprocess.call(["tsk_loaddb", "-d",  "{caseDir}/Evidence_Database/{fileName}.db".format(caseDir=caseDir, fileName=fileName), evidencePath]) #use tsk_loaddb to generate tsk database
-                LoadingDialog.endLoadingDialog(self)                        #ends the loading dialog
+                self._dialog = wx.ProgressDialog("Adding evidence", "Creating database for '{s}'".format(s=fileName), 100)
+                #starts the loading dialog
+                LoadingDialog(self._dialog)                                 
+                #use tsk_loaddb to generate tsk database
+                load_db = subprocess.call(["tsk_loaddb", "-d",  "{caseDir}/Evidence_Database/{fileName}.db".format(caseDir=caseDir, fileName=fileName), evidencePath]) 
+                #ends the loading dialog
+                LoadingDialog.endLoadingDialog(self)                        
 
-                if load_db == 0:                                            #if no error
+                #if no error
+                if load_db == 0:                                            
                     conn = connectdb.create_connection(caseDbPath)
                     with conn:
                         evidenceDbPath = str(evidenceDbDir)+"/"+fileName+".db"
@@ -246,41 +273,54 @@ class mainFrame(wx.Frame):
                         #evidenceMd5 = subprocess.Popen([hash], stdout=subprocess.PIPE).communicate()[0]
                         evidenceMd5 = "None"
                         insertEvidence = (1, fileName, evidenceDbPath, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), evidenceMd5)
-                        connectdb.insertEvidenceDetails(conn, insertEvidence)   #insert to EvidenceInfo in case database
+                        #insert to EvidenceInfo in case database
+                        connectdb.insertEvidenceDetails(conn, insertEvidence)   
                     
-                    evidenceConn = connectdb.create_connection(caseDir+"/Evidence_Database/"+fileName+".db")    #connect to tsk database
-                    evidencePart = connectdb.select_image_partitions(evidenceConn)                              #get image partitions from tsk database
+                    #connect to tsk database
+                    evidenceConn = connectdb.create_connection(caseDir+"/Evidence_Database/"+fileName+".db")    
+                    #get image partitions from tsk database
+                    evidencePart = connectdb.select_image_partitions(evidenceConn)                              
                     
-                    if Path(caseDir+"/Evidence_Database/Deleted_Files.db").is_file() == False:                  #check if Deleted_Files.db exist
+                    #check if Deleted_Files.db exist
+                    if Path(caseDir+"/Evidence_Database/Deleted_Files.db").is_file() == False:                  
                         createDeletedFilesDb = connectdb.create_connection(caseDir+"/Evidence_Database/Deleted_Files.db") 
                         deteledFilesTable = "CREATE TABLE 'DeletedFiles' ('fileType' TEXT, 'status' TEXT, 'inode' TEXT, 'filePath' TEXT, 'ctime' TEXT, 'crtime' TEXT, 'atime' TEXT, 'mtime' TEXT, 'size' INTEGER, 'uid' INTEGER, 'gid' INTEGER, 'image' TEXT);"
-                        connectdb.createTable(createDeletedFilesDb, deteledFilesTable)                          #creates if it does not exist
+                        #creates if it does not exist
+                        connectdb.createTable(createDeletedFilesDb, deteledFilesTable)                          
                     
                     else:
-                        createDeletedFilesDb = connectdb.create_connection(caseDir+"/Evidence_Database/Deleted_Files.db")   #connects to Deleted_Files.db
+                        #connects to Deleted_Files.db
+                        createDeletedFilesDb = connectdb.create_connection(caseDir+"/Evidence_Database/Deleted_Files.db")   
                         
                     for x in evidencePart:
                         if x[2] != "Unallocated":
-                            subprocess.Popen(["tsk_recover", "-e", "-o", str(x[0]), evidencePath, caseDir+"/Extracted/"+fileName]) #recover files from all partitions that re not unallocated
+                            #recover files from all partitions that re not unallocated
+                            subprocess.Popen(["tsk_recover", "-e", "-o", str(x[0]), evidencePath, caseDir+"/Extracted/"+fileName]) 
                             
                             listAllDeletedFiles = "fls -rFdl -o {offset} {image}".format(offset=str(x[0]), image=evidencePath)
-                            process = subprocess.Popen(listAllDeletedFiles, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE) #list all deleted files
+                            #list all deleted files
+                            process = subprocess.Popen(listAllDeletedFiles, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE) 
 
                             stdout,stderr = process.communicate()
                             output = stdout.decode()
-                            chk = re.sub(r'[ ]\*[ ]', '\t*\t', output)          #change all ' ' in the second and third column of fls output to to '\t'
-                            chk = re.sub(r'\n', '\t', chk)                      #change all '\n' to '\t'
-                            chk = chk.split('\t')                               #splits all values between \t into a list 
+                            #change all ' ' in the second and third column of fls output to to '\t'
+                            chk = re.sub(r'[ ]\*[ ]', '\t*\t', output)          
+                            #change all '\n' to '\t'
+                            chk = re.sub(r'\n', '\t', chk)                      
+                            #splits all values between \t into a list 
+                            chk = chk.split('\t')                               
                             itemList = []
                             k=0
                             for i in range(k,len(chk)-1,11):
                                 k=i
-                                itemList.append(chk[k:k+11])                    #appends every 11 items into a list
+                                #appends every 11 items into a list
+                                itemList.append(chk[k:k+11])                    
 
                             with createDeletedFilesDb:
                                 for list in itemList:
                                     insertDeletedFiles = (list[0], list[1], list[2], list[3], list[4], list[5], list[6], list[7], list[8], list[9], list[10], fileName)
-                                    connectdb.insertDeletedFiles(createDeletedFilesDb, insertDeletedFiles)  #inserts all deleted files info into Deleted_Files.db
+                                    #inserts all deleted files info into Deleted_Files.db
+                                    connectdb.insertDeletedFiles(createDeletedFilesDb, insertDeletedFiles)  
                     wx.MessageBox("Extracting '{file}' in the background.".format(file=fileName))
 
                     global evidenceDetails
@@ -309,8 +349,11 @@ class mainFrame(wx.Frame):
         event.Skip()
     #end of menu functions
 
-    #aui tab functions
-    def checkOpenedTab(self, tabName):                     #check if tab is opened in aui
+    #-----------------------#
+    #   AUI Tab Functions   #
+    #-----------------------#
+    #check if tab is opened in aui
+    def checkOpenedTab(self, tabName):                     
         openedTab = set(openTabs)
         if tabName not in openedTab:
             openTabs.append(tabName)
@@ -327,15 +370,20 @@ class mainFrame(wx.Frame):
             self.auiNotebook.AddPage(SummaryTab.TabPanel(self.auiNotebook, caseDetails, evidenceDetails), tabName, False, wx.NullBitmap)
         
         if tabName == "Deleted files":
-            self._dialog = wx.ProgressDialog("Loading", "Loading {tabName}".format(tabName=tabName), 100)  #create loading dialog
-            LoadingDialog(self._dialog)                                                                    #start loading 
-            self.auiNotebook.AddPage(DeletedFilesTab.TabPanel(self.auiNotebook, tabName, caseDir), tabName, False, wx.NullBitmap) #calls and open a aui tab from DeletedFilesTab.py
-            LoadingDialog.endLoadingDialog(self)                                                           #stop loading
+            #create loading dialog
+            self._dialog = wx.ProgressDialog("Loading", "Loading {tabName}".format(tabName=tabName), 100)  
+            #start loading 
+            LoadingDialog(self._dialog)                                                                    
+            #calls and open a aui tab from DeletedFilesTab.py
+            self.auiNotebook.AddPage(DeletedFilesTab.TabPanel(self.auiNotebook, tabName, caseDir), tabName, False, wx.NullBitmap) 
+            #stop loading
+            LoadingDialog.endLoadingDialog(self)                                                           
 
         if tabName == "Bookmarks":
             self._dialog = wx.ProgressDialog("Loading", "Loading {tabName}".format(tabName=tabName), 100)
             LoadingDialog(self._dialog)
-            self.auiNotebook.AddPage(AnalyzedDataTab.TabPanel(self.auiNotebook, tabName, evidenceDetails, caseDir, caseDbPath), tabName, False, wx.NullBitmap)  #calls and open a aui tab from SummaryTab.py
+            #calls and open a aui tab from AnalyzedDataTab.py
+            self.auiNotebook.AddPage(AnalyzedDataTab.TabPanel(self.auiNotebook, tabName, evidenceDetails, caseDir, caseDbPath), tabName, False, wx.NullBitmap)  
             LoadingDialog.endLoadingDialog(self)
 
         for x in analyzedDataTree:
@@ -360,9 +408,12 @@ class mainFrame(wx.Frame):
                 LoadingDialog.endLoadingDialog(self)
 
         for x in evidenceDetails:                     
-            evidenceDbConn = connectdb.create_connection(x[2])                      #connects to tsk database
-            evidenceDbInfo = connectdb.select_image_info(evidenceDbConn)            #get name, size and md5 from tsk database
-            evidencePart  = connectdb.select_image_partitions(evidenceDbConn)       #get partition info from tsk database
+            #connects to tsk database
+            evidenceDbConn = connectdb.create_connection(x[2])                      
+            #get name, size and md5 from tsk database
+            evidenceDbInfo = connectdb.select_image_info(evidenceDbConn)            
+            #get partition info from tsk database
+            evidencePart  = connectdb.select_image_partitions(evidenceDbConn)       
             count = 0
             for i in evidencePart:
                 count += 1
@@ -373,22 +424,28 @@ class mainFrame(wx.Frame):
                     LoadingDialog.endLoadingDialog(self)
                 
     def onItemSel(self, event):  
-        temp = event.GetItem()          #gets selected item from treectrl
+        #gets selected item from treectrl
+        temp = event.GetItem()          
         tabName = self.tree_ctrl_1.GetItemText(temp)    
         print("{name} selected".format(name=tabName))
         
         try:
-            caseDetails                 #checks if caseDetails is defined
-        except:                         #if not defined
+            #checks if caseDetails is defined
+            caseDetails                 
+        #if not defined
+        except:                         
             print("Case not opened")
-        else:                           #if defined
+        #if defined
+        else:                          
             try:                    
                 evidenceDetails
             except:
                 print("No evidence found")
             else:
-                if self.checkOpenedTab(tabName) == True:        #check if selected item is open 
-                    self.addAuiTab(tabName, evidenceDetails)    #open aui tab
+                #check if selected item is open
+                if self.checkOpenedTab(tabName) == True:        
+                    #open aui tab
+                    self.addAuiTab(tabName, evidenceDetails)    
                 else: 
                     print('Tab already open')
 
@@ -398,7 +455,8 @@ class mainFrame(wx.Frame):
         tabName = self.auiNotebook.GetPageText(temp)
         #self.auiNotebook.RemovePage(temp)          #mac
         print("Closing " + tabName)
-        openTabs.remove(tabName)                    #remove closed tab from openTabs
+        #remove closed tab from openTabs
+        openTabs.remove(tabName)                    
     
     def onSearchBtn(self, event):
         try:
@@ -406,31 +464,37 @@ class mainFrame(wx.Frame):
         except:
             print("Case not open")
         else:
-            dlg = search.searchDialog(None)         #calls searchDialog() from search.py
+            #calls searchDialog() from search.py
+            dlg = search.searchDialog(None)         
             dlg.Center()
             dlg.ShowModal()
-            searchItem = dlg.searchItems()          #calls searchItem() to get search and search option
+            #calls searchItem() to get search and search option
+            searchItem = dlg.searchItems()          
 
             searchReturn = []
             if searchItem[1] == "Normal Search":
                 for x in evidenceDetails:
-                    conn = connectdb.create_connection(x[2])                            #connect to tsk database
-                    searchResults = connectdb.search_file_name(conn, searchItem[0])     #search in tsk database
+                    #connect to tsk database
+                    conn = connectdb.create_connection(x[2])                            
+                    #search in tsk database
+                    searchResults = connectdb.search_file_name(conn, searchItem[0])     
                     if searchResults != []:
                         for i in searchResults:
-                            i = i + (x[1],)                                             #adds image location to end of result
-                            searchReturn.append(i)                                      #append each result
+                            #adds image location to end of result
+                            i = i + (x[1],)                                             
+                            #append each result
+                            searchReturn.append(i)                                      
 
                 self._dialog = wx.ProgressDialog("Search", "Searching for {val}".format(val=searchItem[0]), 100)
                 LoadingDialog(self._dialog)
-                self.auiNotebook.AddPage(searchTab.searchTabPanel(self.auiNotebook, searchReturn, caseDir), "Search ("+searchItem[0]+")", False, wx.NullBitmap) #call and add searchTab aui page
+                #call and add searchTab aui page
+                self.auiNotebook.AddPage(searchTab.searchTabPanel(self.auiNotebook, searchReturn, caseDir), "Search ("+searchItem[0]+")", False, wx.NullBitmap) 
                 LoadingDialog.endLoadingDialog(self)
             else:
                 print("Regular Expression")
 
             dlg.Destroy()
         
-
 class LoadingDialog():
     def __init__(self, _dialog):
         self._dialog = _dialog
@@ -457,8 +521,7 @@ class MyApp(wx.App):
         self.ForensicPi.Center()
         
         return True
-    
-
+   
 # end of class MyApp
 
 if __name__ == "__main__":
