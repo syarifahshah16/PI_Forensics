@@ -1,7 +1,6 @@
 import wx
 import datetime
 from datetime import timedelta
-from pathlib import Path
 import connectdb
 import subprocess
 import os      
