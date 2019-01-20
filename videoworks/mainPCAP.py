@@ -17,18 +17,12 @@ import datetime, time
 import re
 import threading
 
-# relating to extraction of values from PCAP file
-# see https://pypi.org/project/dpkt/
+#https://pypi.org/project/dpkt/
 import dpkt
-from dpkt.ip import IP
-from dpkt.ethernet import Ethernet
-from dpkt.arp import ARP
 import datetime, time
 
 import struct
 import socket
-
-
 
 # begin wxGlade: dependencies
 # end wxGlade
@@ -60,13 +54,7 @@ class mainFrame(wx.Frame):
         self.frame_menubar.Append(wxglade_tmp_menu, "File")
         wxglade_tmp_menu = wx.Menu()
         item = wxglade_tmp_menu.Append(wx.ID_ANY, "Clear GUI", "")
-        self.Bind(wx.EVT_MENU, self.onClearGUI, id=item.GetId())
-        item = wxglade_tmp_menu.Append(wx.ID_ANY, "Delete Data", "")
-        self.Bind(wx.EVT_MENU, self.onDeleteData, id=item.GetId())
-        
-        """item = wxglade_tmp_menu.Append(wx.ID_ANY, "Network pcap files", "")
-        self.Bind(wx.EVT_MENU, self.onSelNetworkPcapFiles, id=item.GetId())"""
-
+        self.Bind(wx.EVT_MENU, self.onClearGUI, id=item.GetId())        
         self.frame_menubar.Append(wxglade_tmp_menu, "Tools")
         self.SetMenuBar(self.frame_menubar)
         # Menu Bar end
@@ -85,8 +73,6 @@ class mainFrame(wx.Frame):
         mainFrame.auiNotebook = wx.aui.AuiNotebook(self.windowRightPanel)
         self.paneltest = wx.Panel(mainFrame.auiNotebook, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL)
         
-
-    
         #bind events
         self.Bind(wx.EVT_TREE_ITEM_ACTIVATED, self.onItemSel, self.tree_ctrl_1)
         self.Bind(wx.EVT_BUTTON, self.onSearchBtn, self.searchBtn)
@@ -120,7 +106,6 @@ class mainFrame(wx.Frame):
         self.SetSizer(mainSizer)
         self.Layout()
 
-
     def recreateTree(self, caseDbFile):
         self.tree_ctrl_1.Freeze()
         self.tree_ctrl_1.DeleteAllItems()
@@ -128,12 +113,16 @@ class mainFrame(wx.Frame):
         for x in caseDetails:
             caseName = str(x[2]) + "_" + x[3]
 
-        root = self.tree_ctrl_1.AddRoot(caseName)                                   #adds the name of case as root item in treectrl
+        #adds the name of case as root item in treectrl
+        root = self.tree_ctrl_1.AddRoot(caseName)                                   
         self.tree_ctrl_1.AppendItem(root, "Summary")
        
-        conn = connectdb.create_connection(caseDbFile)                              #connect to case database
-        evidenceInfo = connectdb.select_evidence_details(conn)                      #get evidenceName, EvidenceDbPath EvidenceDatetime and Md5 from case database
-                                                                                    #EvidenceDbPath = path to tsk database generated when onAddEvidence is called
+        #connect to case database
+        conn = connectdb.create_connection(caseDbFile)                              
+        #get evidenceName, EvidenceDbPath EvidenceDatetime and Md5 from case database
+        #EvidenceDbPath = path to tsk database generated when onAddEvidence is called
+        evidenceInfo = connectdb.select_evidence_details(conn)                      
+                                                                                    
         self.tree_ctrl_1.AppendItem(root, "Bookmarks")
         self.tree_ctrl_1.AppendItem(root, "File")
         self.tree_ctrl_1.AppendItem(root, "Images")
@@ -144,7 +133,9 @@ class mainFrame(wx.Frame):
         self.tree_ctrl_1.ExpandAll()
         self.tree_ctrl_1.Thaw()
 
-    #menu functions
+    #--------------------#
+    #   Menu Functions   #
+    #--------------------#
     def onNewCase(self, event):  
         dialog = NewCaseDialog.newCase(None)
         dialog.Center()
@@ -153,41 +144,47 @@ class mainFrame(wx.Frame):
         
         global caseDetails
         try:
-            conn = connectdb.create_connection(dbPath)                      #connects to new case database
-            caseDetails = connectdb.select_case_details(conn)               #get InvestigatorName, CaseNum, CaseName, CaseFolder, CaseDb, CaseDesc, Datatime from case database
-            self.recreateTree(dbPath)                                       #creates treectrl
+            #connects to new case database
+            conn = connectdb.create_connection(dbPath)                      
+            #get InvestigatorName, CaseNum, CaseName, CaseFolder, CaseDb, CaseDesc, Datatime from case database
+            caseDetails = connectdb.select_case_details(conn)               
+            #creates treectrl
+            self.recreateTree(dbPath)                                       
         except:
             pass 
         
         dialog.Destroy()
         
-
     def onOpenCase(self, event):  
-        openFileDialog = wx.FileDialog(self, "Open", "", "","*.db",         #creates a filedialog that only allow user to select .db files
+        #creates a filedialog that only allow user to select .db files
+        openFileDialog = wx.FileDialog(self, "Open", "", "","*.db",         
                                        wx.FD_OPEN | wx.FD_FILE_MUST_EXIST) 
  
         openFileDialog.ShowModal()                      
         global caseDbPath
-        caseDbPath  = openFileDialog.GetPath()                              #get path selected in filedialog
+        #get path selected in filedialog
+        caseDbPath  = openFileDialog.GetPath()                              
         
         global caseDetails, evidenceDetails
         try:
-            conn = connectdb.create_connection(caseDbPath)                  #try to connect to case database and get case and evidence details
+            #try to connect to case database and get case and evidence details
+            conn = connectdb.create_connection(caseDbPath)                  
             caseDetails = connectdb.select_case_details(conn)
-            evidenceDetails = connectdb.select_evidence_details(conn)       #get EvidenceName, EvidenceDbPath, EvidenceDatatime and Md5 from case database
-            self.addAuiTab("Summary", evidenceDetails)                      #opens summary page 
+            #get EvidenceName, EvidenceDbPath, EvidenceDatatime and Md5 from case database
+            evidenceDetails = connectdb.select_evidence_details(conn)       
+            #opens summary page 
+            self.addAuiTab("Summary", evidenceDetails)                      
             openTabs.append("Summary")                          
             self.recreateTree(caseDbPath)
         except:
-            pass                                                            #ignore if try: fails
+            #ignore if try: fails
+            pass                                                            
         openFileDialog.Destroy()
-
 
     def runsessions(lock):
         lock.acquire()
         global evidencePath
-        # Find the window corresponding to the File tab so that we can
-        # access it
+        #find the window corresponding to the Sessions tab so that we can access it
         pageCount = mainFrame.auiNotebook.GetPageCount()
         found = False
         print("Page count: ", pageCount)
@@ -202,42 +199,42 @@ class mainFrame(wx.Frame):
 
         if False == found:
             print("ERROR: Tab window not found!")
-            return # can't continue with this function                    
+            return #can't continue with this function                    
             
         #rb is for opening non-text files
         f = open(evidencePath, 'rb')
         pcap = dpkt.pcap.Reader(f)
 
-        # For each packet in the pcap process the contents
+        #for each packet in the pcap process the contents
         identifier = 0
         for timestamp, buf in pcap:
 
-            """# Print out the timestamp in UTC
-            print ("Timestamp" , str(datetime.datetime.utcfromtimestamp(timestamp)))"""
+            #print out the timestamp in UTC
+            #print ("Timestamp" , str(datetime.datetime.utcfromtimestamp(timestamp)))
                     
             identifier = identifier + 1
             Packet  = identifier
 
-            # Unpack the Ethernet frame (mac src/dst, ethertype)
+            #unpack the Ethernet frame (mac src/dst, ethertype)
             eth = dpkt.ethernet.Ethernet(buf)
-            """print ('Ethernet Frame: ', mac_addr(eth.src), mac_addr(eth.dst), eth.type)"""
+            #print ('Ethernet Frame: ', mac_addr(eth.src), mac_addr(eth.dst), eth.type)
 
-            # Make sure the Ethernet frame contains an IP packet
+            #make sure the Ethernet frame contains an IP packet
             if not isinstance(eth.data, dpkt.ip.IP):
                 print ('Non IP Packet type not supported %s\n' % eth.data.__class__.__name__)
                 continue
 
-            # Now unpack the data within the Ethernet frame (the IP packet)
-            # Pulling out src, dst, length, fragment info, TTL, and Protocol
+            #now unpack the data within the Ethernet frame (the IP packet)
+            #pulling out src, dst, length, fragment info, TTL, and Protocol
             ip_hdr = eth.data
 
-            # Check for TCP in the transport layer
+            #check for TCP in the transport layer
             if isinstance(ip_hdr.data, dpkt.tcp.TCP):
 
-                # Set the TCP data
+                #set the TCP data
                 tcp = ip_hdr.data
 
-                # Now see if we can parse the contents as a HTTP request
+                #now see if we can parse the contents as a HTTP request
                 try:
                     request = dpkt.http.Request(tcp.data)
                 except (dpkt.dpkt.NeedData, dpkt.dpkt.UnpackError):
@@ -260,22 +257,20 @@ class mainFrame(wx.Frame):
             pcapSessionsTab.SessionsTabPanel.addSessionsDetails(window, sequence)
         lock.release()
 
-  
     def rundns(lock):
         lock.acquire()
         global evidencePath
-
+        #find the window corresponding to the DNS tab so that we can access it
         pageCount = mainFrame.auiNotebook.GetPageCount()
         found = False
         print("Page count: ", pageCount)
-        for i in range (0, pageCount): # 0 to pageCount - 1
+        for i in range (0, pageCount): #0 to pageCount - 1
             text = mainFrame.auiNotebook.GetPageText(i)
             print("Page ", i, ": ", text, ";")
-
             if text == "DNS":
                 window = mainFrame.auiNotebook.GetPage(i)
                 found = True
-                break # from for-loop
+                break #from for-loop
 
         #rb is for opening non-text files
         f = open(evidencePath, 'rb')
@@ -327,43 +322,41 @@ class mainFrame(wx.Frame):
                     pcapDNSTab.DNSTabPanel.addDNSDetails(window, row2)
         lock.release()
 
-
     def runCred(lock):
         lock.acquire()
         global evidencePath
-        # Find the window corresponding to the File tab so that we can
-        # access it
+        #find the window corresponding to the Credentials tab so that we can access it
         pageCount = mainFrame.auiNotebook.GetPageCount()
         found = False
         print("Page count: ", pageCount)
         #must initialize the page count on top so i can use here to match the text
-        for i in range (0, pageCount): # 0 to pageCount - 1
+        for i in range (0, pageCount): #0 to pageCount - 1
             text = mainFrame.auiNotebook.GetPageText(i)
             print("Page ", i, ": ", text, ";")
             if text == "Credentials":
                 window = mainFrame.auiNotebook.GetPage(i)
                 found = True
-                break # from for-loop
+                break #from for-loop
 
         if False == found:
             print("ERROR: Tab window not found!")
-            return # can't continue with this function                    
+            return #can't continue with this function                    
             
         #rb is for opening non-text files
         f = open(evidencePath, 'rb')
         pcap = dpkt.pcap.Reader(f)
 
-        # For each packet in the pcap process the contents
+        #for each packet in the pcap process the contents
         identifier = 0
         for timestamp, buf in pcap:
 
-            """# Print out the timestamp in UTC
-            print ("Timestamp" , str(datetime.datetime.utcfromtimestamp(timestamp)))"""
+            # Print out the timestamp in UTC
+            #print ("Timestamp" , str(datetime.datetime.utcfromtimestamp(timestamp)))
                     
             identifier = identifier + 1
             frameNumber  = identifier
 
-            # Unpack the Ethernet frame (mac src/dst, ethertype)
+            #unpack the Ethernet frame (mac src/dst, ethertype)
             eth = dpkt.ethernet.Ethernet(buf)
 
             if eth.type == dpkt.ethernet.ETH_TYPE_IP:
@@ -373,13 +366,13 @@ class mainFrame(wx.Frame):
                 ip     = eth.ip
                 tcp    = ip.data
                     
-                # Frame number (assumed to be a sequential number which
-                # identifies a Ethernet entry within the PCAP)
+                #frame number (assumed to be a sequential number which
+                #identifies a Ethernet entry within the PCAP)
                 frameNumber  = identifier
                     
-                #------------------------
-                # Server to Web Client
-                #------------------------
+                #--------------------------#
+                #   Server to Web Client   #
+                #--------------------------#
                 src_ip_addr_bin = ip_hdr.src
                 src_host_str = socket.inet_ntoa(src_ip_addr_bin)
                     
@@ -400,9 +393,9 @@ class mainFrame(wx.Frame):
                     
                 print("Source host: ", src_host_str)
                     
-                #------------------------
-                # Web Client to Server
-                #------------------------
+                #--------------------------#
+                #   Web Client to Server   #
+                #--------------------------#
                 dst_ip_addr_bin = ip_hdr.dst
                 dst_host_str = socket.inet_ntoa(dst_ip_addr_bin)
                     
@@ -417,8 +410,7 @@ class mainFrame(wx.Frame):
                         #for server side, name of machine    
                         user_agent = http.headers['user-agent'] if 'user-agent' in http.headers else None
                         src_host_str = src_host_str + " [" + str(user_agent) + "]"
-                            
-                                
+                               
                     except Exception:
                             print("Exception in Request direction")
                             
@@ -431,9 +423,9 @@ class mainFrame(wx.Frame):
                         
                 print("Desintation host: ", dst_host_str)
                     
-                #-----------------
-                # Output to GUI
-                #-----------------
+                #-------------------#
+                #   Output to GUI   #
+                #-------------------#
                 sequence = [str(frameNumber), str(src_host_str),str(dst_host_str)]
                 pcapCredentialsTab.CredTabPanel.addCredDetails(window, sequence)    
                     
@@ -447,13 +439,12 @@ class mainFrame(wx.Frame):
     def runFiles(lock):
         lock.acquire()
         global evidencePath
-        # Find the window corresponding to the File tab so that we can
-        # access it
+        #find the window corresponding to the File tab so that we can access it
         pageCount = mainFrame.auiNotebook.GetPageCount()
         found = False
         print("Page count: ", pageCount)
         #must initialize the page count on top so i can use here to match the text
-        for i in range (0, pageCount): # 0 to pageCount - 1
+        for i in range (0, pageCount): #0 to pageCount - 1
             text = mainFrame.auiNotebook.GetPageText(i)
             print("Page ", i, ": ", text, ";")
             if text == "File":
@@ -463,13 +454,13 @@ class mainFrame(wx.Frame):
 
         if False == found:
             print("ERROR: Tab window not found!")
-            return # can't continue with this function                    
+            return #can't continue with this function                    
             
         #rb is for opening non-text files
         f = open(evidencePath, 'rb')
         pcap = dpkt.pcap.Reader(f)
 
-        # For each packet in the pcap process the contents
+        #for each packet in the pcap process the contents
         identifier = 0
         httpFileTransferCount = 0;
         for timestamp, buf in pcap:
@@ -519,7 +510,7 @@ class mainFrame(wx.Frame):
                         except Exception:
                             print("Exception in Response direction")
                                 
-                    # if SSL        
+                    #if SSL        
                     #https://dpkt.readthedocs.io/en/latest/_modules/dpkt/ssl.html
                     #https://gist.github.com/strizhechenko/3b70da47d317f8f8875d39edbfc5d7fc
                     #https://tools.ietf.org/html/rfc5246#section-7.4.2
@@ -666,17 +657,17 @@ class mainFrame(wx.Frame):
 
         lock.release()
 
-
-   
     def onAddEvidence(self, event):
-        """relating to extraction of values from PCAP file"""
         global caseDetails
         try:
             caseDetails                                                     
-        except NameError:                                                   #if caseDetails not defined
+        #if caseDetails not defined
+        except NameError:                                                   
             print("Case not opened")                                        
-        else:                                                               #if caseDetails is defined
-            openFileDialog = wx.FileDialog(self, "Open", "", "","*.pcap",     #creates a filedialog that only allow user to select .pcap files 
+        #if caseDetails is defined
+        else:                                                               
+            #creates a filedialog that only allow user to select .pcap files 
+            openFileDialog = wx.FileDialog(self, "Open", "", "","*.pcap",     
                                         wx.FD_OPEN | wx.FD_FILE_MUST_EXIST)
     
             openFileDialog.ShowModal()                         
@@ -685,41 +676,40 @@ class mainFrame(wx.Frame):
             #evidencePath includes filename                                   
             evidencePath = openFileDialog.GetPath()
 
-            # creating a lock 
+            #creating a lock 
             lock = threading.Lock()
 
-            # creating thread 
+            #creating thread 
             t1 = threading.Thread(target=mainFrame.runsessions, args=(lock,)) 
             t2 = threading.Thread(target=mainFrame.rundns, args=(lock,))
             t3 = threading.Thread(target=mainFrame.runCred, args=(lock,))
             t4 = threading.Thread(target=mainFrame.runFiles, args=(lock,))
   
-            # starting thread 1 
+            #starting thread 1 
             t1.start() 
-            # starting thread 2 
+            #starting thread 2 
             t2.start()
             #starting thread 3
             t3.start() 
             #starting thread 4
             t4.start()   
 
-            # wait until thread 1 is completely executed 
+            #wait until thread 1 is completely executed 
             t1.join() 
-            # wait until thread 2 is completely executed 
+            #wait until thread 2 is completely executed 
             t2.join()
             #wait until thread 3 is completely executed
             t3.join() 
             #wait until thread 4 is completely executed
             t4.join() 
     
-            # both threads completely executed 
+            #both threads completely executed 
             print("Done!")     
             
             print ("\nPCAP extraction finished.\n")
 
         openFileDialog.Destroy() # close PCAP file
             
-
     def onQuit(self, event):  
         self.Close()
         self.Destroy()
@@ -728,14 +718,13 @@ class mainFrame(wx.Frame):
         print("Event handler 'onClearGUI' not implemented!")
         event.Skip()
 
-    def onDeleteData(self, event):  
-        print("Event handler 'onDeleteData' not implemented!")
-        event.Skip()
-
     #end of menu functions
 
-    #aui tab functions
-    def checkOpenedTab(self, tabName):                     #check if tab is opened in aui
+    #-----------------------#
+    #   AUI Tab Functions   #
+    #-----------------------#
+    #check if tab is opened in aui
+    def checkOpenedTab(self, tabName):                     
         openedTab = set(openTabs)
         if tabName not in openedTab:
             openTabs.append(tabName)
@@ -752,45 +741,61 @@ class mainFrame(wx.Frame):
             self.auiNotebook.AddPage(SummaryTab.TabPanel(self.auiNotebook, caseDetails, evidenceDetails), tabName, False, wx.NullBitmap)
 
         if tabName == "File":
-            self._dialog = wx.ProgressDialog("Loading", "Loading {tabName}".format(tabName=tabName), 100)  #create loading dialog
-            LoadingDialog(self._dialog)                                                                    #start loading 
-            self.auiNotebook.AddPage(pcapFilesTab.FilesTabPanel(self.auiNotebook, tabName, caseDir), tabName, False, wx.NullBitmap) #calls and open a aui tab from DeletedFilesTab.py
+            #create loading dialog
+            self._dialog = wx.ProgressDialog("Loading", "Loading {tabName}".format(tabName=tabName), 100)  
+            #start loading
+            LoadingDialog(self._dialog)                                                                     
+            #calls and open a aui tab from pcapFilesTab.py
+            self.auiNotebook.AddPage(pcapFilesTab.FilesTabPanel(self.auiNotebook, tabName, caseDir), tabName, False, wx.NullBitmap) 
             LoadingDialog.endLoadingDialog(self)
 
-
         if tabName == "Images":
-            self._dialog = wx.ProgressDialog("Loading", "Loading {tabName}".format(tabName=tabName), 100)  #create loading dialog
-            LoadingDialog(self._dialog)                                                                    #start loading 
-            self.auiNotebook.AddPage(ImagesTab.TabPanel(self.auiNotebook, tabName, caseDir), tabName, False, wx.NullBitmap) #calls and open a aui tab from DeletedFilesTab.py
+            #create loading dialog
+            self._dialog = wx.ProgressDialog("Loading", "Loading {tabName}".format(tabName=tabName), 100)  
+            #start loading 
+            LoadingDialog(self._dialog)                                                                    
+            #calls and open a aui tab from ImagesTab.py
+            self.auiNotebook.AddPage(ImagesTab.TabPanel(self.auiNotebook, tabName, caseDir), tabName, False, wx.NullBitmap) 
             LoadingDialog.endLoadingDialog(self)    
 
         if tabName == "Sessions":
-            self._dialog = wx.ProgressDialog("Loading", "Loading {tabName}".format(tabName=tabName), 100)  #create loading dialog
-            LoadingDialog(self._dialog)                                                                    #start loading 
-            self.auiNotebook.AddPage(pcapSessionsTab.SessionsTabPanel(self.auiNotebook, caseDir), tabName, False, wx.NullBitmap) #calls and open a aui tab from DeletedFilesTab.py
+            #create loading dialog
+            self._dialog = wx.ProgressDialog("Loading", "Loading {tabName}".format(tabName=tabName), 100)  
+            #start loading 
+            LoadingDialog(self._dialog)                                                                    
+            #calls and open a aui tab from pcapSessionsTab.py
+            self.auiNotebook.AddPage(pcapSessionsTab.SessionsTabPanel(self.auiNotebook, caseDir), tabName, False, wx.NullBitmap) 
             LoadingDialog.endLoadingDialog(self)    
 
         if tabName == "DNS":
-            self._dialog = wx.ProgressDialog("Loading", "Loading {tabName}".format(tabName=tabName), 100)  #create loading dialog
-            LoadingDialog(self._dialog)                                                                    #start loading 
-            self.auiNotebook.AddPage(pcapDNSTab.DNSTabPanel(self.auiNotebook, caseDir), tabName, False, wx.NullBitmap) #calls and open a aui tab from DeletedFilesTab.py
+            #create loading dialog
+            self._dialog = wx.ProgressDialog("Loading", "Loading {tabName}".format(tabName=tabName), 100)  
+            #start loading 
+            LoadingDialog(self._dialog)                                                                    
+            #calls and open a aui tab from pcapDNSTab.py
+            self.auiNotebook.AddPage(pcapDNSTab.DNSTabPanel(self.auiNotebook, caseDir), tabName, False, wx.NullBitmap) 
             LoadingDialog.endLoadingDialog(self)    
 
         if tabName == "Credentials":
-            self._dialog = wx.ProgressDialog("Loading", "Loading {tabName}".format(tabName=tabName), 100)  #create loading dialog
-            LoadingDialog(self._dialog)                                                                    #start loading 
-            self.auiNotebook.AddPage(pcapCredentialsTab.CredTabPanel(self.auiNotebook, tabName, caseDir), tabName, False, wx.NullBitmap) #calls and open a aui tab from DeletedFilesTab.py
+            #create loading dialog
+            self._dialog = wx.ProgressDialog("Loading", "Loading {tabName}".format(tabName=tabName), 100)  
+            #start loading
+            LoadingDialog(self._dialog)                                                                     
+            #calls and open a aui tab from pcapCredentialsTab.py
+            self.auiNotebook.AddPage(pcapCredentialsTab.CredTabPanel(self.auiNotebook, tabName, caseDir), tabName, False, wx.NullBitmap) 
             LoadingDialog.endLoadingDialog(self)    
 
         if tabName == "Bookmarks":
+            #create loading dialog
             self._dialog = wx.ProgressDialog("Loading", "Loading {tabName}".format(tabName=tabName), 100)
+            #start loading            
             LoadingDialog(self._dialog)
+            #calls and open a aui tab from pcapBookmarkTab.py
             self.auiNotebook.AddPage(pcapBookmarkTab.BookmarkTabPanel(self.auiNotebook, evidenceDetails, caseDir, caseDbPath), tabName, False, wx.NullBitmap)  #calls and open a aui tab from SummaryTab.py
             LoadingDialog.endLoadingDialog(self)
 
-
-        # TODO un-comment-out the following code once evidence exists properly
-        # note: commented-out to allow File tab to be tested before database code added
+        #TODO un-comment-out the following code once evidence exists properly
+        #note: commented-out to allow File tab to be tested before database code added
         """for x in evidenceDetails:                  
             evidenceDbConn = connectdb.create_connection(x[2])                      #connects to tsk database
             evidenceDbInfo = connectdb.select_image_info(evidenceDbConn)            #get name, size and md5 from tsk database
@@ -805,30 +810,39 @@ class mainFrame(wx.Frame):
                     LoadingDialog.endLoadingDialog(self)"""
                 
     def onItemSel(self, event):  
-        temp = event.GetItem()          #gets selected item from treectrl
+        #gets selected item from treectrl
+        temp = event.GetItem()          
         tabName = self.tree_ctrl_1.GetItemText(temp)    
         print("{name} selected".format(name=tabName))
         
-        if self.checkOpenedTab(tabName) == True:        #check if selected item is open 
-            evidenceDetails = 0 # TODO remove this line when database code has been added
-            self.addAuiTab(tabName, evidenceDetails)    #open aui tab
+        #check if selected item is open 
+        if self.checkOpenedTab(tabName) == True:        
+            #TODO remove this line when database code has been added
+            evidenceDetails = 0 
+            #open aui tab
+            self.addAuiTab(tabName, evidenceDetails)    
         else: 
             print('Tab already open')
             
-        # TODO un-comment-out the following code (and remove lines above) once evidence exists properly
-        # note: commented-out to allow File tab to be tested before database code added
+        #TODO un-comment-out the following code (and remove lines above) once evidence exists properly
+        #note: commented-out to allow File tab to be tested before database code added
         """try:
-            caseDetails                 #checks if caseDetails is defined
-        except:                         #if not defined
+            #checks if caseDetails is defined
+            caseDetails                 
+        #if not defined
+        except:                         
             print("Case not opened")
-        else:                           #if defined
+        #if defined
+        else:                           
             try:                    
                 evidenceDetails
             except:
                 print("No evidence found")
             else:
-                if self.checkOpenedTab(tabName) == True:        #check if selected item is open 
-                    self.addAuiTab(tabName, evidenceDetails)    #open aui tab
+                #check if selected item is open 
+                if self.checkOpenedTab(tabName) == True:        
+                    #open aui tab
+                    self.addAuiTab(tabName, evidenceDetails)    
                 else: 
                     print('Tab already open')"""
 
@@ -838,7 +852,8 @@ class mainFrame(wx.Frame):
         tabName = self.auiNotebook.GetPageText(temp)
         #self.auiNotebook.RemovePage(temp)          #mac
         print("Closing " + tabName)
-        openTabs.remove(tabName)                    #remove closed tab from openTabs
+        #remove closed tab from openTabs
+        openTabs.remove(tabName)                    
     
     def onSearchBtn(self, event):
         try:
@@ -846,31 +861,37 @@ class mainFrame(wx.Frame):
         except:
             print("Case not open")
         else:
-            dlg = search.searchDialog(None)         #calls searchDialog() from search.py
+            #calls searchDialog() from search.py
+            dlg = search.searchDialog(None)         
             dlg.Center()
             dlg.ShowModal()
-            searchItem = dlg.searchItems()          #calls searchItem() to get search and search option
+            #calls searchItem() to get search and search option
+            searchItem = dlg.searchItems()          
 
             searchReturn = []
             if searchItem[1] == "Normal Search":
                 for x in evidenceDetails:
-                    conn = connectdb.create_connection(x[2])                            #connect to tsk database
-                    searchResults = connectdb.search_file_name(conn, searchItem[0])     #search in tsk database
+                    #connect to tsk database
+                    conn = connectdb.create_connection(x[2])                            
+                    #search in tsk database
+                    searchResults = connectdb.search_file_name(conn, searchItem[0])     
                     if searchResults != []:
                         for i in searchResults:
-                            i = i + (x[1],)                                             #adds image location to end of result
-                            searchReturn.append(i)                                      #append each result
+                            #adds image location to end of result
+                            i = i + (x[1],)                                             
+                            #append each result
+                            searchReturn.append(i)                                      
 
                 self._dialog = wx.ProgressDialog("Search", "Searching for {val}".format(val=searchItem[0]), 100)
                 LoadingDialog(self._dialog)
-                self.auiNotebook.AddPage(searchTab.searchTabPanel(self.auiNotebook, searchReturn, caseDir), "Search ("+searchItem[0]+")", False, wx.NullBitmap) #call and add searchTab aui page
+                #call and add searchTab aui page
+                self.auiNotebook.AddPage(searchTab.searchTabPanel(self.auiNotebook, searchReturn, caseDir), "Search ("+searchItem[0]+")", False, wx.NullBitmap) 
                 LoadingDialog.endLoadingDialog(self)
             else:
                 print("Regular Expression")
 
             dlg.Destroy()
-        
-
+       
 class LoadingDialog():
     def __init__(self, _dialog):
         self._dialog = _dialog
@@ -897,7 +918,6 @@ class MyApp(wx.App):
         self.ForensicPi.Center()        
         return True
     
-
 # end of class MyApp
 
 if __name__ == "__main__":
