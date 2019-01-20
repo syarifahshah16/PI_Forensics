@@ -13,7 +13,6 @@ import os
 # begin wxGlade: extracode
 # end wxGlade
 
-
 class mainmenu(wx.Dialog):
     def __init__(self, *args, **kwds):
         # begin wxGlade: mainmenu.__init__
