@@ -12,7 +12,6 @@ import wx
 # begin wxGlade: extracode
 # end wxGlade
 
-
 class searchDialog(wx.Dialog):
     def __init__(self, *args, **kwds):
         # begin wxGlade: searchDialog.__init__
