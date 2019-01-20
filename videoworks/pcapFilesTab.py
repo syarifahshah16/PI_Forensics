@@ -1,7 +1,6 @@
 import wx
 import datetime
 from datetime import timedelta
-from pathlib import Path
 import connectdb
 import subprocess
 import os      
@@ -46,4 +45,3 @@ class FilesTabPanel(wx.Panel):
 
     def addPcapDetails(self, sequence):
         self.list_ctrl_1.AppendItem(sequence)
-        
