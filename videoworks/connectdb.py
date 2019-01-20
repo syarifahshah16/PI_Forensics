@@ -1,14 +1,14 @@
 #!/usr/bin/python
 
-# References:
-# https://www.pythoncentral.io/introduction-to-sqlite-in-python/
+#References:
+#https://www.pythoncentral.io/introduction-to-sqlite-in-python/
 
-
- 
 import sqlite3
 from sqlite3 import Error
- 
- 
+
+#-----------------------#
+#   Basic Connections   #
+#-----------------------#
 def create_connection(db_file):
     """ create a database connection to the SQLite database
         specified by the db_file
@@ -34,20 +34,41 @@ def createTable(conn, table):
     except Error as e:
         print(e)
 
+#------------------#
+#   Case Details   #
+#------------------#
 def insertCaseDetails(conn, details):
     sql = ''' INSERT INTO CaseInfo(InvestigatorName, CaseNum, CaseName, CaseFolder, CaseDb, CaseDesc, Datetime)
               VALUES(?,?,?,?,?,?,?) '''
     cur = conn.cursor()
     cur.execute(sql, details)
     return cur.lastrowid
+   
+def select_case_details(conn):
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM CaseInfo")
+    rows = cur.fetchall()
+    return rows
 
+#----------------------#
+#   Evidence Details   #
+#----------------------#
 def insertEvidenceDetails(conn, details):
     sql = ''' INSERT INTO EvidenceInfo(CaseID, EvidenceName, EvidenceDbPath, EvidenceDatetime, Md5)
               VALUES(?,?,?,?,?) '''
     cur = conn.cursor()
     cur.execute(sql, details)
     return cur.lastrowid
-
+   
+def select_evidence_details(conn):
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM EvidenceInfo")
+    rows = cur.fetchall()
+    return rows
+   
+#-------------------#
+#   Deleted Files   #
+#-------------------#
 def insertDeletedFiles(conn, details):
     sql = ''' INSERT INTO DeletedFiles(fileType, status, inode, filePath, ctime, crtime, atime, mtime, size, uid, gid, image)
                 VALUES(?,?,?,?,?,?,?,?,?,?,?,?) '''
@@ -61,6 +82,9 @@ def select_deleted_files(conn):
     rows = cur.fetchall()
     return rows
 
+#---------------#
+#   Bookmarks   #
+#---------------#
 def insertBookmarks(conn, details):
     sql = ''' INSERT INTO Bookmarks(fileName, ctime, crtime, atime, mtime, uid, gid, md5, size, parentPath, extension, image)
                 VALUES(?,?,?,?,?,?,?,?,?,?,?,?)'''
@@ -89,19 +113,9 @@ def deleteBookmarkItem(conn, fileName, parentPath):
     cur = conn.cursor()
     cur.execute(sql)
     
-def select_case_details(conn):
-    
-    cur = conn.cursor()
-    cur.execute("SELECT * FROM CaseInfo")
-    rows = cur.fetchall()
-    return rows
-
-def select_evidence_details(conn):
-    cur = conn.cursor()
-    cur.execute("SELECT * FROM EvidenceInfo")
-    rows = cur.fetchall()
-    return rows
-
+#------------#
+#   Images   #
+#------------#
 def select_image_partitions(conn):
     cur = conn.cursor()
     cur.execute("SELECT start, length, desc FROM tsk_vs_parts")
@@ -114,6 +128,9 @@ def select_image_info(conn):
     rows = cur.fetchall()
     return rows
 
+#----------------------------#
+#   Other Select Databases   #
+#----------------------------#
 def select_all_files(conn):
     cur = conn.cursor()
     cur.execute("SELECT name, size, ctime, crtime, atime, mtime, uid, gid, md5, parent_path, extension FROM tsk_files WHERE name != '.' AND name != '..'")
@@ -132,7 +149,9 @@ def search_file_name(conn, search):
     rows = cur.fetchall()
     return rows 
 
-
+#--------------------#
+#   File Databases   #
+#--------------------#
 def createPcapEvidenceTable(conn):
     try:
         cursor = conn.cursor() # Get a cursor object
@@ -146,7 +165,6 @@ def insertPcapEvidenceDetails(conn, frameNum, filePath, srcHost, srcPort, dstHos
     cursor = conn.cursor()
     cursor.execute('''INSERT INTO pcapEvidenceTable(frameNum, filePath, srcHost, srcPort, dstHost, dstPort, protocol, filename, ext, size, timestamp) VALUES(?,?,?,?,?,?,?,?,?,?,?)''',
                    (frameNum, filePath, srcHost, srcPort, dstHost, dstPort, protocol, filename, ext, size, timestamp))
-    
     conn.commit()
 
 def selectPcapEvidenceDetails(conn, id):
@@ -155,6 +173,9 @@ def selectPcapEvidenceDetails(conn, id):
     row = cursor.fetchone()
     return row
 
+#------------------------#
+#   Sessions Databases   #
+#------------------------#
 def createPcapSessionsTable(conn):
     try:
         cursor = conn.cursor() # Get a cursor object
@@ -168,7 +189,7 @@ def insertPcapSessionsDetails(conn, Packet, timestamp, src_ip, dst_ip, request):
     cursor = conn.cursor()
     cursor.execute('''INSERT INTO pcapSessionsTable(Packet, timestamp, src_ip, dst_ip, request) VALUES(?,?,?,?,?)''',
                    (Packet, timestamp, src_ip, dst_ip, request))
-    
+   
     conn.commit()
 
 def selectPcapSessionsDetails(conn, id):
