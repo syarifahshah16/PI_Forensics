@@ -73,8 +73,7 @@ class TabPanel(wx.Panel):
         self.__set_properties()
         self.__do_layout()
         # end wxGlade
-
-
+        
     def __set_properties(self):
         # begin wxGlade: MyFrame.__set_properties
         #self.SetTitle("frame")
@@ -101,7 +100,8 @@ class TabPanel(wx.Panel):
 
         self.window_1.SetMinimumPaneSize(20)
 
-        for x in evidenceInfo:                                      #lookup the database and appends items returned to listctrl using load_quried_files()
+        #lookup the database and appends items returned to listctrl using load_quried_files()
+        for x in evidenceInfo:                                      
             if auiPageName == "Images":
                 self.load_queried_files(self.list_ctrl, "'png' OR extension = 'jpg' OR extension = 'jpeg' OR extension = 'exif' OR extension = 'tiff' OR extension = 'gif' OR extension ='bmp' OR extension = 'bpg' ", x[2])
 
@@ -152,21 +152,29 @@ class TabPanel(wx.Panel):
         self.notebookTab = self.notebook.GetPageText(temp)
 
     def onListItemSel(self, event):
-        sel = self.list_ctrl.GetFocusedItem()                   #get selected item
-        fileName = self.list_ctrl.GetItemText(sel, 0)           #get filename of selected item from col 0
-        fileParentPath = self.list_ctrl.GetItemText(sel, 9)     #get parent path of selected item from col 9
+        #get selected item
+        sel = self.list_ctrl.GetFocusedItem()                   
+        #get filename of selected item from col 0
+        fileName = self.list_ctrl.GetItemText(sel, 0)           
+        #get parent path of selected item from col 9
+        fileParentPath = self.list_ctrl.GetItemText(sel, 9)     
         filePath = fileParentPath + fileName
 
 
         if self.notebookTab == " " or self.notebookTab == "Hex":
-            for x in evidenceInfo:                                                                                                              #loop through the directories in /Extracted/
-                if Path(caseDirectory+"/Extracted/"+x[1]+filePath).is_file():                                                                   #if file exist 
-                    temp = subprocess.Popen(["xxd", caseDirectory+"/Extracted/"+x[1]+filePath], stdout=subprocess.PIPE).communicate()[0]        #get hexdump
-                    self.text_ctrl_hex.SetValue(temp)                                                                                           #display in txtctrl
+            #loop through the directories in /Extracted/
+            for x in evidenceInfo:                                                                                                              
+                #if file exist 
+                if Path(caseDirectory+"/Extracted/"+x[1]+filePath).is_file():                                                                   
+                    #get hexdump
+                    temp = subprocess.Popen(["xxd", caseDirectory+"/Extracted/"+x[1]+filePath], stdout=subprocess.PIPE).communicate()[0]        
+                    #display in txtctrl
+                    self.text_ctrl_hex.SetValue(temp)                                                                                           
         
         elif self.notebookTab == "Strings":
             for x in evidenceInfo:
-                fullFilePath = caseDirectory+"/Extracted/"+x[1]+filePath        #adds '\' infront of ' ', '$', '()' and '[]' to escape spaces in filepaths
+                #adds '\' infront of ' ', '$', '()' and '[]' to escape spaces in filepaths
+                fullFilePath = caseDirectory+"/Extracted/"+x[1]+filePath        
                 regexfullFilePath = re.sub(r'[ ]', '\ ', fullFilePath)
                 regexfullFilePath = re.sub(r'\$', '\$', regexfullFilePath)
                 regexfullFilePath = re.sub(r'\(', '\(', regexfullFilePath)
@@ -175,24 +183,29 @@ class TabPanel(wx.Panel):
                 regexfullFilePath = re.sub(r'\]', '\]', regexfullFilePath)
                 if Path(fullFilePath).is_file():
                     command = "xxd {path} | awk -F '{reg}' '{col}'".format(path=regexfullFilePath, reg="  ", col="{print $2 $3 $4}")
-                    process = subprocess.Popen([command], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)                           #gets last column of hexdump
+                    #gets last column of hexdump
+                    process = subprocess.Popen([command], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)                           
                     stdout, stderr = process.communicate()
                     output = stdout.strip().decode()
                     _error = stderr.strip().decode()
                     if _error == '':
-                        regex = re.sub(r'[.]{2,}|[-]{2,}|[=]{2,}', " ", output)                                                                 #removes '.', '-' and '=' from hexdump
-                        self.text_ctrl_String.SetValue(regex)                                                                                   #display in txtctrl
+                        #removes '.', '-' and '=' from hexdump
+                        regex = re.sub(r'[.]{2,}|[-]{2,}|[=]{2,}', " ", output)                                                                 
+                        #display in txtctrl
+                        self.text_ctrl_String.SetValue(regex)                                                                                   
 
         elif self.notebookTab == "File metadata":
             for x in evidenceInfo:
                 if Path(caseDirectory+"/Extracted/"+x[1]+filePath).is_file():
-                    temp = subprocess.Popen(["exiftool", caseDirectory+"/Extracted/"+x[1]+filePath], stdout=subprocess.PIPE).communicate()[0]   #get exif data of selected file
+                    #get exif data of selected file
+                    temp = subprocess.Popen(["exiftool", caseDirectory+"/Extracted/"+x[1]+filePath], stdout=subprocess.PIPE).communicate()[0]   
                     self.text_ctrl_FileMetadata.SetValue(temp)                                  
 
         elif self.notebookTab == "Image":
             for x in evidenceInfo:
                 if Path(caseDirectory+"/Extracted/"+x[1]+filePath).is_file():
-                    if fileName.lower().endswith(('.png', '.jpg', '.jpeg', '.exif', '.tiff', '.gif', '.bmp', '.bpg')):                          #display image using bitmap if file extension matches
+                    #display image using bitmap if file extension matches
+                    if fileName.lower().endswith(('.png', '.jpg', '.jpeg', '.exif', '.tiff', '.gif', '.bmp', '.bpg')):                          
                         self.bitmap.SetBitmap(wx.Bitmap(caseDirectory+"/Extracted/"+x[1]+filePath, wx.BITMAP_TYPE_ANY))                         
                         
 
@@ -200,19 +213,24 @@ class TabPanel(wx.Panel):
             for x in evidenceInfo:
                 if Path(caseDirectory+"/Extracted/"+x[1]+filePath).is_file():
                     if fileName.lower().endswith(('.txt', '.rtf')):
-                        f = open(caseDirectory+"/Extracted/"+x[1]+filePath, "r")                                                                #read selected file if extension match
-                        self.text_ctrl_IndexText.SetValue(f.read())                                                                             #display in txtctrl
+                        #read selected file if extension match
+                        f = open(caseDirectory+"/Extracted/"+x[1]+filePath, "r")                                                                
+                        #display in txtctrl
+                        self.text_ctrl_IndexText.SetValue(f.read())                                                                             
                         f.close()
 
                         
     def load_queried_files(self, list_ctrl, extension, dbFilePath):
         try:
-            conn = connectdb.create_connection(dbFilePath)                                     #connect to tsk database
-            queriedFileInfo = connectdb.select_queried_files(conn, extension)                  #returns with files of defined extensions
+            #connect to tsk database
+            conn = connectdb.create_connection(dbFilePath)                                     
+            #returns with files of defined extensions
+            queriedFileInfo = connectdb.select_queried_files(conn, extension)                  
 
             for x in queriedFileInfo:
                 if x[2] != "NULL":
-                    ctime = datetime.datetime(1970, 1, 1) + timedelta(seconds=x[2])            #convert seconds to datetime
+                    #convert seconds to datetime
+                    ctime = datetime.datetime(1970, 1, 1) + timedelta(seconds=x[2])            
                 else:
                     ctime = x[2]
                     
@@ -231,29 +249,36 @@ class TabPanel(wx.Panel):
                 else:
                     mtime = x[5]
 
-                self.list_ctrl.Append((x[0], ctime, crtime, atime, mtime, x[6], x[7], x[8], x[1], x[9], x[10])) #append to listctrl
+                #append to listctrl
+                self.list_ctrl.Append((x[0], ctime, crtime, atime, mtime, x[6], x[7], x[8], x[1], x[9], x[10])) 
     
         except:
             pass
 
     def loadBookmarks(self):
-        conn = connectdb.create_connection(caseDb)              #connect to case database
-        bookmarkQuery = connectdb.selectBookmarks(conn)         #lookup bookmarks table
+        #connect to case database
+        conn = connectdb.create_connection(caseDb)              
+        #lookup bookmarks table
+        bookmarkQuery = connectdb.selectBookmarks(conn)         
         for x in bookmarkQuery:
-            self.list_ctrl.Append((x[0], x[1], x[2], x[3], x[4], x[5], x[6], x[7], x[8], x[9], x[10], x[11])) #apped to listctrl
+            #apped to listctrl
+            self.list_ctrl.Append((x[0], x[1], x[2], x[3], x[4], x[5], x[6], x[7], x[8], x[9], x[10], x[11])) 
 
     def onRightClick(self, event):
-        self.window_bottom_pane.PopupMenu(self.popupmenu)       #show menu on right click
+        #show menu on right click
+        self.window_bottom_pane.PopupMenu(self.popupmenu)       
         
-
     def OnBookmarkSelect(self, event):
-        #item = self.popupmenu.FindItemById(event.GetId())       
-        sel = self.list_ctrl.GetFocusedItem()                   #get selected item
+        #item = self.popupmenu.FindItemById(event.GetId())      
+        #get selected item
+        sel = self.list_ctrl.GetFocusedItem()                   
         fileName = self.list_ctrl.GetItemText(sel, 0)       
         parentPath = self.list_ctrl.GetItemText(sel, 9)
         filePath = parentPath+fileName
-        conn = connectdb.create_connection(caseDb)              #connect to case database
-        isUnique = connectdb.chkUniqueBookmark(conn, fileName, parentPath)  #check if bookmarks table has selected item
+        #connect to case database
+        conn = connectdb.create_connection(caseDb)              
+        #check if bookmarks table has selected item
+        isUnique = connectdb.chkUniqueBookmark(conn, fileName, parentPath)  
         if isUnique == True:
             _rows = []
             for x in evidenceInfo:
@@ -264,14 +289,18 @@ class TabPanel(wx.Panel):
                 selRow = []
                 for x in range(0,11):
                     temp = self.list_ctrl.GetItemText(sel, x)   
-                    selRow.append(temp)                         #adds each column of selected row into selRow
-                selRow.append(_image)                           #adds the image directory name to selRow
-                _rows.append(selRow)                            #add selRow to _rows
+                    #adds each column of selected row into selRow
+                    selRow.append(temp)                         
+                #adds the image directory name to selRow    
+                selRow.append(_image)                           
+                #add selRow to _rows
+                _rows.append(selRow)                            
 
             with conn:
                 for x in _rows:     
                     if x[11] != '':
-                        _fileInfo = (x[0], x[1], x[2], x[3], x[4], x[5], x[6], x[7], x[8], x[9], x[10], x[11])  #insert _rows to bookmarks table in case database
+                        #insert _rows to bookmarks table in case database
+                        _fileInfo = (x[0], x[1], x[2], x[3], x[4], x[5], x[6], x[7], x[8], x[9], x[10], x[11])  
                         connectdb.insertBookmarks(conn, _fileInfo)
         else:
             wx.MessageBox("Selected item already exist in Bookmarks")
@@ -304,7 +333,8 @@ class TabPanel(wx.Panel):
                     _fullPath = caseDirectory+"/Extracted/"+x[1]+parentPath
 
         #subprocess.Popen(["open", _fullPath]) #mac
-        subprocess.Popen(["pcmanfm", _fullPath]) #rasp          #open the directory of selected file in pcmanfm
+        #open the directory of selected file in pcmanfm
+        subprocess.Popen(["pcmanfm", _fullPath]) #rasp          
 
     def onExtract(self, event):
         sel = self.list_ctrl.GetFocusedItem()
@@ -312,10 +342,12 @@ class TabPanel(wx.Panel):
         selParentPath = self.list_ctrl.GetItemText(sel, 9)
         fileSource = selParentPath+selFileName
         
-        extractFileDialog = wx.FileDialog(self, "Extract to...", "", selFileName, "", wx.FD_SAVE|wx.FD_OVERWRITE_PROMPT)    #opens filedialog to ask user for file save location
+        #opens filedialog to ask user for file save location
+        extractFileDialog = wx.FileDialog(self, "Extract to...", "", selFileName, "", wx.FD_SAVE|wx.FD_OVERWRITE_PROMPT)    
         extractFileDialog.ShowModal()                         
             
-        extractPath = extractFileDialog.GetPath()           #get file save path               
+        #get file save path
+        extractPath = extractFileDialog.GetPath()                          
         fileName = os.path.basename(extractPath)
 
         _fullPath = ""
@@ -328,12 +360,12 @@ class TabPanel(wx.Panel):
                     _fullPath = caseDirectory+"/Extracted/"+x[1]+fileSource
         extractFileDialog.Destroy()
         if _fullPath != "":
-            subprocess.Popen(["cp", _fullPath, extractPath])                                                            #copy selected file from /Extracted/ to file save path
+            #copy selected file from /Extracted/ to file save path
+            subprocess.Popen(["cp", _fullPath, extractPath])                                                            
             print("extract from {fileSource} to {extractPath}".format(fileSource=_fullPath, extractPath=extractPath))
         
         # end wxGlade
-
-
+        
 # end of class MyFrame
 
 # class TabPanel(wx.App):
