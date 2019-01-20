@@ -127,47 +127,58 @@ class searchTabPanel(wx.Panel):
     def onListItemSel(self, event):
 
         sel = self.list_ctrl.GetFocusedItem()
-        fileName = self.list_ctrl.GetItemText(sel, col=0) # get filename from col 0
+        #get filename from col 0
+        fileName = self.list_ctrl.GetItemText(sel, col=0) 
         parentPath = self.list_ctrl.GetItemText(sel, col=9)
         filePath = parentPath+'/'+fileName
         image = self.list_ctrl.GetItemText(sel, col=11)
         
 
         if notebookTab == "" or notebookTab == "Hex":
-            temp = subprocess.Popen(["xxd", self.caseDirectory+"/Extracted/"+image+"/"+filePath], stdout=subprocess.PIPE).communicate()[0]   #get hexdump of selected file
-            self.text_ctrl_hex.SetValue(temp)                               #display return in txtctrl
+            #get hexdump of selected file
+            temp = subprocess.Popen(["xxd", self.caseDirectory+"/Extracted/"+image+"/"+filePath], stdout=subprocess.PIPE).communicate()[0]   
+            #display return in txtctrl
+            self.text_ctrl_hex.SetValue(temp)                               
 
         elif notebookTab == "Strings":
             fullFilePath = self.caseDirectory+"/Extracted/"+image+"/"+filePath
-            regexfullFilePath = re.sub(r'[ ]', '\ ', fullFilePath)          #adds '\' infront of ' ', '$', '()' and '[]' to escape spaces in filepaths
+            #adds '\' infront of ' ', '$', '()' and '[]' to escape spaces in filepaths
+            regexfullFilePath = re.sub(r'[ ]', '\ ', fullFilePath)          
             regexfullFilePath = re.sub(r'\$', '\$', regexfullFilePath)
             regexfullFilePath = re.sub(r'\(', '\(', regexfullFilePath)
             regexfullFilePath = re.sub(r'\)', '\)', regexfullFilePath)
             regexfullFilePath = re.sub(r'\[', '\[', regexfullFilePath)
             regexfullFilePath = re.sub(r'\]', '\]', regexfullFilePath)
             if Path(fullFilePath).is_file():
-                command = "xxd {path} | awk -F '{reg}' '{col}'".format(path=regexfullFilePath, reg="  ", col="{print $2 $3 $4}") #get last column of hexdump
+                #get last column of hexdump
+                command = "xxd {path} | awk -F '{reg}' '{col}'".format(path=regexfullFilePath, reg="  ", col="{print $2 $3 $4}") 
                 process = subprocess.Popen([command], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                 stdout, stderr = process.communicate()
                 output = stdout.strip().decode()
                 _error = stderr.strip().decode()
                 if _error == '':
-                    regex = re.sub(r'[.]{2,}|[-]{2,}|[=]{2,}', " ", output) #removes all '.', '-' and '=' from hexdump
-                    self.text_ctrl_String.SetValue(regex)                   #display in txtctrl
+                    #removes all '.', '-' and '=' from hexdump
+                    regex = re.sub(r'[.]{2,}|[-]{2,}|[=]{2,}', " ", output) 
+                    #display in txtctrl
+                    self.text_ctrl_String.SetValue(regex)                   
 
         elif notebookTab == "File metadata":
-            temp = subprocess.Popen(["exiftool", self.caseDirectory+"/Extracted/"+image+"/"+filePath], stdout=subprocess.PIPE).communicate()[0] #get exif data
+            #get exif data
+            temp = subprocess.Popen(["exiftool", self.caseDirectory+"/Extracted/"+image+"/"+filePath], stdout=subprocess.PIPE).communicate()[0] 
             self.text_ctrl_FileMetadata.SetValue(temp)
 
         elif notebookTab == "Image":
             if fileName.lower().endswith(('.png', '.jpg', '.jpeg', '.exif', '.tiff', '.gif', '.bmp', '.bpg')):
-                self.bitmap.SetBitmap(wx.Bitmap(self.caseDirectory+"/Extracted/"+image+"/"+filePath, wx.BITMAP_TYPE_ANY))                       #display image using bitmap if file extension matches
+                #display image using bitmap if file extension matches
+                self.bitmap.SetBitmap(wx.Bitmap(self.caseDirectory+"/Extracted/"+image+"/"+filePath, wx.BITMAP_TYPE_ANY))                       
 
         elif notebookTab == "Index Text":
             if Path(self.caseDirectory+"/Extracted/"+image+"/"+filePath).is_file():
                 if fileName.lower().endswith(('.txt', '.rtf')):                     
-                    f = open(self.caseDirectory+"/Extracted/"+image+"/"+filePath, "r")   #read selected file
-                    self.text_ctrl_IndexText.SetValue(f.read())                     #display in txtctrl
+                    #read selected file
+                    f = open(self.caseDirectory+"/Extracted/"+image+"/"+filePath, "r")
+                    #display in txtctrl
+                    self.text_ctrl_IndexText.SetValue(f.read())                     
                     f.close() 
 
     def load_queried_files(self, searchResults):
@@ -193,11 +204,9 @@ class searchTabPanel(wx.Panel):
                 mtime = x[5]
 
             self.list_ctrl.Append((x[0], ctime, crtime, atime, mtime, x[6], x[7], x[8], x[1], x[9], x[10], x[11]))
-
-
+            
         #event.skip()
         # end wxGlade
-
 
 # end of class MyFrame
 
