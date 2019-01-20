@@ -1,7 +1,6 @@
 import wx
 import datetime
 from datetime import timedelta
-from pathlib import Path
 import connectdb
 import subprocess
 import os      
@@ -15,7 +14,6 @@ class SessionsTabPanel(wx.Panel):
         wx.Panel.__init__(self, parent=parent)
         self.pcaplist = wx.dataview.DataViewListCtrl(self, wx.ID_ANY)
         
-
         self.__set_properties()
         self.__do_layout()
         # end wxGlade
@@ -42,6 +40,3 @@ class SessionsTabPanel(wx.Panel):
 
     def addSessionsDetails(self, sequence):
         self.pcaplist.AppendItem(sequence)
-
-
-        
