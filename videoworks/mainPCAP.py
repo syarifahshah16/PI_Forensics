@@ -8,12 +8,11 @@ import wx
 import wx.aui
 import os
 import random
-import SummaryTab, pcapFilesTab, NewCaseDialog, mainmenu, search, searchTab, pcapSessionsTab, pcapDNSTab, pcapCredentialsTab         
+import SummaryTab, pcapFilesTab, NewCaseDialog, mainmenu, search, searchTab, pcapSessionsTab, pcapDNSTab, pcapCredentialsTab, pcapBookmarkTab         
 import connectdb
 import subprocess
 import sqlite3
 from sqlite3 import Error
-from pathlib import Path
 import datetime, time
 import re
 import threading
@@ -86,6 +85,7 @@ class mainFrame(wx.Frame):
         mainFrame.auiNotebook = wx.aui.AuiNotebook(self.windowRightPanel)
         self.paneltest = wx.Panel(mainFrame.auiNotebook, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL)
         
+
     
         #bind events
         self.Bind(wx.EVT_TREE_ITEM_ACTIVATED, self.onItemSel, self.tree_ctrl_1)
@@ -785,7 +785,7 @@ class mainFrame(wx.Frame):
         if tabName == "Bookmarks":
             self._dialog = wx.ProgressDialog("Loading", "Loading {tabName}".format(tabName=tabName), 100)
             LoadingDialog(self._dialog)
-            self.auiNotebook.AddPage(AnalyzedDataTab.TabPanel(self.auiNotebook, tabName, evidenceDetails, caseDir, caseDbPath), tabName, False, wx.NullBitmap)  #calls and open a aui tab from SummaryTab.py
+            self.auiNotebook.AddPage(pcapBookmarkTab.BookmarkTabPanel(self.auiNotebook, evidenceDetails, caseDir, caseDbPath), tabName, False, wx.NullBitmap)  #calls and open a aui tab from SummaryTab.py
             LoadingDialog.endLoadingDialog(self)
 
 
