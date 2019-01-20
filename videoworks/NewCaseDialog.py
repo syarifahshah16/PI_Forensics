@@ -107,33 +107,43 @@ class newCase(wx.Dialog):
 
     def onConfirm(self, event):
         #create case dir
-        dirPath = self.txtCaseFolder.GetValue()         #get case folder path
+        #get case folder path
+        dirPath = self.txtCaseFolder.GetValue()         
         casePath = Path(dirPath)
-        if casePath.is_dir():                           #check if it exist
+        #check if it exist
+        if casePath.is_dir():                           
             print("dir exist")
         else:
-            os.mkdir(dirPath)                           #create if does not
+            #create if does not
+            os.mkdir(dirPath)                           
 
             #create case database
-            dbFilePath = self.txtCaseDb.GetValue()      #get case database path
+            #get case database path
+            dbFilePath = self.txtCaseDb.GetValue()      
             my_file = Path(dbFilePath)
 
             #print(dbFilePath)
-            if my_file.is_file():   #check if file exist
+            #check if file exist
+            if my_file.is_file():   
                 print("file exist")
             else:
-                conn = connectdb.create_connection(dbFilePath) #creates db file and connection if it does not exist
+                #creates db file and connection if it does not exist
+                conn = connectdb.create_connection(dbFilePath) 
                 caseInfoTable = "CREATE TABLE 'CaseInfo' ( 'CaseID' INTEGER PRIMARY KEY AUTOINCREMENT, 'InvestigatorName' TEXT, 'CaseNum' INTEGER, 'CaseName' TEXT, 'CaseFolder' TEXT, 'CaseDb' TEXT, 'CaseDesc' TEXT, 'Datetime' TEXT);"
                 evidenceInfoTable = "CREATE TABLE 'EvidenceInfo' ('CaseID' INTEGER, 'EvidenceName' TEXT, 'EvidenceDbPath' TEXT, 'EvidenceDatetime' TEXT, 'Md5' TEXT);"
                 bookmarksTable = "CREATE TABLE 'Bookmarks' ('fileName' TEXT, 'ctime' TEXT, 'crtime' TEXT, 'atime' TEXT, 'mtime' TEXT, 'uid' INTEGER, 'gid' INTEGER, 'md5' TEXT, 'size' INTEGER, 'parentPath' TEXT, 'extension' TEXT, 'image' TEXT);"
-                connectdb.createTable(conn, caseInfoTable)      #creates CaseInfo table
-                connectdb.createTable(conn, evidenceInfoTable)  #creates EvidenceInfo table
-                connectdb.createTable(conn, bookmarksTable)     #creates Bookmarsk table
+                #creates CaseInfo table
+                connectdb.createTable(conn, caseInfoTable)      
+                #creates EvidenceInfo table
+                connectdb.createTable(conn, evidenceInfoTable)  
+                #creates Bookmarks table
+                connectdb.createTable(conn, bookmarksTable)     
 
                 #insert case details
                 with conn:
                     caseDetails = (self.txtInvestigatorName.GetValue(), self.txtCaseNum.GetValue(), self.txtCaseName.GetValue(), self.txtCaseFolder.GetValue(), self.txtCaseDb.GetValue(), self.txtCaseDescription.GetValue(), datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-                    connectdb.insertCaseDetails(conn, caseDetails)  #insert case details to CaseInfo
+                    #insert case details to CaseInfo
+                    connectdb.insertCaseDetails(conn, caseDetails)  
             
         self.Close()
 
@@ -143,8 +153,4 @@ class newCase(wx.Dialog):
     def getCaseDb(self):
         return self.txtCaseDb.GetValue()
 
-    
-
-
 # end of class MyDialog
-
