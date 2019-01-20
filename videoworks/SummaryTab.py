@@ -78,9 +78,9 @@ class TabPanel(wx.Panel):
         sizer_9.Add(sizer_2, 0, wx.EXPAND, 0)
 
         
-            # for x in imageInfo:
-            #     x = list(x)
-            #     self.addEvidence(evidenceMainSizer, x[0], x[1], x[2])
+        #for x in imageInfo:
+        #x = list(x)
+        #self.addEvidence(evidenceMainSizer, x[0], x[1], x[2])
         global evidenceAddDate
         for x in evidenceDetails:
             evidenceAddDate = x[3]
@@ -90,15 +90,18 @@ class TabPanel(wx.Panel):
         for x in evidenceInfo:
             global imageInfo
             try:
-                conn = connectdb.create_connection(x[2])                #connect to tsk database
-                imageInfo = connectdb.select_image_info(conn)           #get evidence name, size and md5 from tsk database
+                #connect to tsk database
+                conn = connectdb.create_connection(x[2])                
+                #get evidence name, size and md5 from tsk database
+                imageInfo = connectdb.select_image_info(conn)           
             except:
                 pass
 
             for i in imageInfo:
                     i = list(i)
                     fileName = os.path.basename(i[0])
-                    self.addEvidence(evidenceMainSizer, fileName, i[1], x[4])       #sets the evidence along with the details on the top panel
+                    #sets the evidence along with the details on the top panel
+                    self.addEvidence(evidenceMainSizer, fileName, i[1], x[4])       
                     evidenceCount += 1
 
         lblEvidenceCount.SetLabel(str(evidenceCount))
@@ -134,7 +137,8 @@ class TabPanel(wx.Panel):
         caseInfoGridSizer.Add(self.txtCaseDesc, 1, wx.ALL | wx.EXPAND, 5)
         caseInfoGridSizer.AddGrowableCol(1)
 
-        for x in caseDetails:                           #sets the case info
+        #sets the case info
+        for x in caseDetails:                           
             lblInvestigatorName.SetLabel(x[1])
             lblCaseNum.SetLabel(str(x[2]))
             lblCaseName.SetLabel(x[3])
@@ -142,8 +146,6 @@ class TabPanel(wx.Panel):
             self.txtCaseDb.SetValue(x[5])
             self.txtCaseDesc.SetValue(x[6])
             
-
-
         sizer_13.Add(caseInfoGridSizer, 1, wx.ALL | wx.EXPAND, )
         sizer_12.Add(sizer_13, 1, wx.EXPAND, 0)
         
