@@ -82,6 +82,3 @@ class BookmarkTabPanel(wx.Panel):
         sizer_3.Add(self.pcapAddedBookM, 1, wx.EXPAND, 0)
         self.SetSizer(sizer_3)
         self.Layout()
-
-
-        
