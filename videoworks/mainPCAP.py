@@ -8,7 +8,7 @@ import wx
 import wx.aui
 import os
 import random
-import SummaryTab, pcapFilesTab, NewCaseDialog, mainmenu, search, searchTab, pcapSessionsTab, pcapDNSTab, pcapCredentialsTab, pcapBookmarkTab         
+import SummaryTab, pcapFilesTab, NewCaseDialog, mainmenu, search, searchTab, pcapSessionsTab, pcapDNSTab, pcapCredentialsTab, pcapBookmarkTab, pcapImagesTab       
 import connectdb
 import subprocess
 import sqlite3
@@ -754,8 +754,8 @@ class mainFrame(wx.Frame):
             self._dialog = wx.ProgressDialog("Loading", "Loading {tabName}".format(tabName=tabName), 100)  
             #start loading 
             LoadingDialog(self._dialog)                                                                    
-            #calls and open a aui tab from ImagesTab.py
-            self.auiNotebook.AddPage(ImagesTab.TabPanel(self.auiNotebook, tabName, caseDir), tabName, False, wx.NullBitmap) 
+            #calls and open a aui tab from pcapImagesTab.py
+            self.auiNotebook.AddPage(pcapImagesTab.TabPanel(self.auiNotebook,tabName, evidenceDetails, caseDir, caseDbPath), tabName, False, wx.NullBitmap) 
             LoadingDialog.endLoadingDialog(self)    
 
         if tabName == "Sessions":
