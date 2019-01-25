@@ -690,6 +690,9 @@ class mainFrame(wx.Frame):
             #get the filename of the pcap
             fileName = os.path.basename(evidencePath)
 
+            self._dialog = wx.ProgressDialog("Loading", "Uploading PCAP", 100)  #create loading dialog
+            LoadingDialog(self._dialog)
+
             # creating a lock 
             lock = threading.Lock()
 
@@ -717,7 +720,8 @@ class mainFrame(wx.Frame):
             t3.join() 
             #wait until thread 4 is completely executed
             t4.join()
-    
+            
+            LoadingDialog.endLoadingDialog(self)
             # both threads completely executed 
             print("Done!")
 
@@ -741,9 +745,9 @@ class mainFrame(wx.Frame):
                                 wx.DD_DEFAULT_STYLE | wx.DD_DIR_MUST_EXIST)
         if directoryfiledialog.ShowModal() == wx.ID_OK:
             creaderpath = directoryfiledialog.GetPath()                         #get path of selected directory
-            directoryname = os.path.basename(creaderpath)                       #get directory name
+            directoryname = directoryfiledialog.GetPath()     #get directory name
 
-            print(fileName)
+            print(directoryname)
             crd = ['chaosreader', fileName, '--dir', directoryname]             #run the chaosreader cmd
             process = Popen(crd, stdout=PIPE, stderr=PIPE)
             stdout, stderr = process.communicate()
@@ -753,15 +757,18 @@ class mainFrame(wx.Frame):
 
 
     def on_md5_hash(self, event):
-        global evidencePath   
+        global fileName   
         md5_hash = hashlib.md5()
         print(evidencePath)
-        f = open(evidencePath, 'rb')
+        f = open(fileName, 'rb')
         # Read and update hash in chunks of 4K
         for byte_block in iter(lambda: f.read(4096),b""):
             md5_hash.update(byte_block)
         print(md5_hash.hexdigest())
         pcapMD5 = md5_hash.hexdigest()
+
+
+        wx.MessageBox('MD5 HASH: ' +pcapMD5 , 'MD5 HASH', wx.OK | wx.ICON_INFORMATION)
             
 
     #end of menu functions
