@@ -155,7 +155,7 @@ class SummaryTabPanel(wx.Panel):
         # end wxGlade
 
     def addEvidence(self, mainSizer, imgName, imgSize, imgMd5):
-        self.text_ctrl1 = wx.TextCtrl(self.panel_2, wx.ID_ANY, style=wx.TE_READONLY | wx.BORDER_NONE)
+        self.text_ctrl1 = wx.TextCtrl(self.panel_2, wx.ID_ANY, str(imgMd5), style=wx.TE_READONLY | wx.BORDER_NONE)
         self.text_ctrl2 = wx.TextCtrl(self.panel_2, wx.ID_ANY, "{imgSize} bytes".format(imgSize=imgSize), style=wx.TE_READONLY | wx.BORDER_NONE)
         self.text_ctrl3 = wx.TextCtrl(self.panel_2, wx.ID_ANY, evidenceAddDate, style=wx.TE_READONLY | wx.BORDER_NONE)
         
@@ -163,6 +163,7 @@ class SummaryTabPanel(wx.Panel):
         self.text_ctrl1.SetBackgroundColour(wx.Colour(235, 235, 235))
         self.text_ctrl2.SetBackgroundColour(wx.Colour(235, 235, 235))
         self.text_ctrl3.SetBackgroundColour(wx.Colour(235, 235, 235))
+        self.text_ctrl1.SetMinSize((290, 30))
         
 
         gridSizer = wx.FlexGridSizer(0, 2, 0, 0)
@@ -170,13 +171,13 @@ class SummaryTabPanel(wx.Panel):
         gridSizer.Add((30, 28), 0, 0, 0)
         gridSizer.Add((0, 0), 0, 0, 0)
 
-        lblMd5 = wx.StaticText(self.panel_2, wx.ID_ANY, "Md5 Hash:")
+        lblMd5 = wx.StaticText(self.panel_2, wx.ID_ANY, "HDD Md5 Hash:")
         infoSizer.Add(lblMd5, 0, wx.ALL, 5)
         infoSizer.Add(self.text_ctrl1, 0, wx.BOTTOM | wx.EXPAND | wx.LEFT | wx.RIGHT, 5)
         lblSize = wx.StaticText(self.panel_2, wx.ID_ANY, "HDD Evidence Size:")
         infoSizer.Add(lblSize, 0, wx.ALL, 5)
         infoSizer.Add(self.text_ctrl2, 0, wx.BOTTOM | wx.EXPAND | wx.LEFT | wx.RIGHT, 5)
-        lblDateAdded = wx.StaticText(self.panel_2, wx.ID_ANY, "Date/time added")
+        lblDateAdded = wx.StaticText(self.panel_2, wx.ID_ANY, "Date/Time added:")
         infoSizer.Add(lblDateAdded, 0, wx.ALL, 5)
         infoSizer.Add(self.text_ctrl3, 0, wx.BOTTOM | wx.EXPAND | wx.LEFT | wx.RIGHT, 5)
         gridSizer.Add(infoSizer, 1, wx.EXPAND, 0)
