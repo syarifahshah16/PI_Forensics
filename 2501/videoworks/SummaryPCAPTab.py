@@ -186,6 +186,4 @@ class SummaryTabPanel(wx.Panel):
         
         mainSizer.Add(gridSizer, 0, wx.BOTTOM | wx.EXPAND | wx.LEFT, 6)
 
-    def addmd5(self, pcapMD5):
-        self.text_ctrl1.WriteText(pcapMD5)
 # end of class MyFrame
