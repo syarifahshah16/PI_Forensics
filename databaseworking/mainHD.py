@@ -183,7 +183,8 @@ class mainFrame(wx.Frame):
         try:
             conn = connectdb.create_connection(dbPath)                      #connects to new case database
             caseDetails = connectdb.select_case_details(conn)               #get InvestigatorName, CaseNum, CaseName, CaseFolder, CaseDb, CaseDesc, Datatime from case database
-            self.recreateTree(dbPath)                                       #creates treectrl
+            self.recreateTree(dbPath)     #creates treectrl
+            wx.MessageBox('Case Created!' , ' ', wx.OK | wx.ICON_INFORMATION)
         except:
             pass 
         
@@ -206,6 +207,7 @@ class mainFrame(wx.Frame):
             self.addAuiTab("Summary", evidenceDetails)                      #opens summary page 
             openTabs.append("Summary")                          
             self.recreateTree(caseDbPath)
+            wx.MessageBox('Case Opened!' , ' ', wx.OK | wx.ICON_INFORMATION)
         except:
             pass                                                            #ignore if try: fails
         openFileDialog.Destroy()
@@ -214,7 +216,8 @@ class mainFrame(wx.Frame):
     def onAddEvidence(self, event):
         try:
             caseDetails                                                     
-        except NameError:                                                   #if caseDetails not defined
+        except NameError:
+            wx.MessageBox('Case not opened!' , ' ', wx.OK | wx.ICON_INFORMATION)                                                   #if caseDetails not defined
             print("Case not opened")                                        
         else:                                                               #if caseDetails is defined
             openFileDialog = wx.FileDialog(self, "Open", "", "","*.dd",     #creates a filedialog that only allow user to select .dd files 
