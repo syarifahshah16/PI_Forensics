@@ -5,10 +5,7 @@
 #
 
 import wx
-
-#import connectdb
-import database as connectdb
-
+import connectdb
 import os
 import sqlite3
 from sqlite3 import Error
@@ -161,18 +158,22 @@ class TabPanel(wx.Panel):
         self.text_ctrl1 = wx.TextCtrl(self.panel_2, wx.ID_ANY, str(imgMd5), style=wx.TE_READONLY | wx.BORDER_NONE)
         self.text_ctrl2 = wx.TextCtrl(self.panel_2, wx.ID_ANY, "{imgSize} bytes".format(imgSize=imgSize), style=wx.TE_READONLY | wx.BORDER_NONE)
         self.text_ctrl3 = wx.TextCtrl(self.panel_2, wx.ID_ANY, evidenceAddDate, style=wx.TE_READONLY | wx.BORDER_NONE)
-        
+        self.text_ctrl4 = wx.TextCtrl(self.panel_2, wx.ID_ANY, imgName, style=wx.TE_CENTRE | wx.TE_READONLY | wx.BORDER_NONE)
 
         self.text_ctrl1.SetBackgroundColour(wx.Colour(235, 235, 235))
         self.text_ctrl2.SetBackgroundColour(wx.Colour(235, 235, 235))
         self.text_ctrl3.SetBackgroundColour(wx.Colour(235, 235, 235))
-        
+        self.text_ctrl4.SetBackgroundColour(wx.Colour(235, 235, 235))
+        self.text_ctrl1.SetMinSize((290, 30))
 
         gridSizer = wx.FlexGridSizer(0, 2, 0, 0)
         infoSizer = wx.BoxSizer(wx.VERTICAL)
         gridSizer.Add((30, 28), 0, 0, 0)
         gridSizer.Add((0, 0), 0, 0, 0)
 
+        bitmap = wx.StaticBitmap(self.panel_2, wx.ID_ANY, wx.Bitmap("hdd.png", wx.BITMAP_TYPE_ANY))
+
+        gridSizer.Add(bitmap, 1, wx.ALL, 7)
         lblMd5 = wx.StaticText(self.panel_2, wx.ID_ANY, "Md5 Hash:")
         infoSizer.Add(lblMd5, 0, wx.ALL, 5)
         infoSizer.Add(self.text_ctrl1, 0, wx.BOTTOM | wx.EXPAND | wx.LEFT | wx.RIGHT, 5)
@@ -183,8 +184,7 @@ class TabPanel(wx.Panel):
         infoSizer.Add(lblDateAdded, 0, wx.ALL, 5)
         infoSizer.Add(self.text_ctrl3, 0, wx.BOTTOM | wx.EXPAND | wx.LEFT | wx.RIGHT, 5)
         gridSizer.Add(infoSizer, 1, wx.EXPAND, 0)
-
-        
-        
+        gridSizer.Add(self.text_ctrl4, 0, wx.BOTTOM | wx.EXPAND | wx.LEFT | wx.RIGHT, 5)
+        gridSizer.Add((0, 0), 0, 0, 0)
         mainSizer.Add(gridSizer, 0, wx.BOTTOM | wx.EXPAND | wx.LEFT, 6)
 # end of class MyFrame
