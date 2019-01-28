@@ -1,7 +1,7 @@
 import wx
 import wx.aui
 import os
-import SummaryTab, FileTab, ImagesTab, SessionsTab, DNSTab, CredentialsTab        
+import SummaryPCAPTab, FileTab, ImagesTab, SessionsTab, DNSTab, CredentialsTab        
 import NewCaseDialog, mainmenu, search, searchTab
 #import connectdb
 import database as connectdb
@@ -14,6 +14,7 @@ import _thread
 import threading 
 import datetime, time
 import re
+import hashlib
 
 
 #begin wxGlade: dependencies
@@ -257,10 +258,10 @@ class mainFrame(wx.Frame):
 
 
     def on_md5_hash(self, event):
-        global fileName   
+        global evidencePath   
         md5_hash = hashlib.md5()
         print(evidencePath)
-        f = open(fileName, 'rb')
+        f = open(evidencePath, 'rb')
         # Read and update hash in chunks of 4K
         for byte_block in iter(lambda: f.read(4096),b""):
             md5_hash.update(byte_block)
