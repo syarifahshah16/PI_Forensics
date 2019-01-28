@@ -707,7 +707,7 @@ class mainFrame(wx.Frame):
             caseDir = x[4]
 
         if tabName == "Summary":
-            self.auiNotebook.AddPage(SummaryTab.TabPanel(self.auiNotebook, caseDetails, evidenceDetails), tabName, False, wx.NullBitmap)
+            self.auiNotebook.AddPage(SummaryPCAPTab.SummaryTabPanel(self.auiNotebook, caseDetails, evidenceDetails), tabName, False, wx.NullBitmap)
 
         if tabName == "File":
             #create loading dialog
