@@ -3,6 +3,7 @@ import wx.aui
 import os
 import SummaryPCAPTab, FileTab, ImagesTab, SessionsTab, DNSTab, CredentialsTab        
 import NewCaseDialog, mainmenu, search, searchTab
+from subprocess import Popen, PIPE
 #import connectdb
 import database as connectdb
 
