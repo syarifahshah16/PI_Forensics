@@ -239,7 +239,7 @@ class mainFrame(wx.Frame):
         self.Destroy()
 
     def on_html_report(self, event):  
-        global fileName
+        global evidencePath
         directoryfiledialog = wx.DirDialog (None, "Choose directory", "",
                                 wx.DD_DEFAULT_STYLE | wx.DD_DIR_MUST_EXIST)
         if directoryfiledialog.ShowModal() == wx.ID_OK:
@@ -250,12 +250,12 @@ class mainFrame(wx.Frame):
 
             print(directoryname)
             #run the chaosreader cmd
-            crd = ['chaosreader', fileName, '--dir', directoryname]             
+            crd = ['chaosreader', evidencePath, '--dir', directoryname]             
             process = Popen(crd, stdout=PIPE, stderr=PIPE)
             stdout, stderr = process.communicate()
 
             #print out full path so that user knows exactly where the directory is
-            print("Report successfully made in " +creaderpath) 
+            print("Report successfully made in " +creaderpath)
 
 
     def on_md5_hash(self, event):
