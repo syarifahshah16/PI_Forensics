@@ -157,6 +157,7 @@ class mainFrame(wx.Frame):
             caseDetails = connectdb.select_case_details(self.conn) 
             self.recreateTree(dbPath)
             caseDbPath = dbPath
+            wx.MessageBox('Case Created!' , ' ', wx.OK | wx.ICON_INFORMATION)
             
         except:
             pass 
@@ -174,7 +175,7 @@ class mainFrame(wx.Frame):
         #get path selected in filedialog
         caseDbPath  = openFileDialog.GetPath()                              
         
-        global caseDetails, openTabs
+        global caseDetails
         try:
             #try to connect to case database and get case and evidence details
             self.conn = connectdb.create_connection(caseDbPath)
@@ -185,6 +186,7 @@ class mainFrame(wx.Frame):
             #opens summary page 
             openTabs.append("Summary")                          
             self.recreateTree(caseDbPath)
+            wx.MessageBox('Case Opened!' , ' ', wx.OK | wx.ICON_INFORMATION)
         except:
             #ignore if try: fails
             pass                                                            
@@ -196,7 +198,8 @@ class mainFrame(wx.Frame):
         try:
             caseDetails                                                     
         #if caseDetails not defined
-        except NameError:                                                   
+        except NameError:
+            wx.MessageBox('Case not opened!' , ' ', wx.OK | wx.ICON_INFORMATION)                                                   
             print("Case not opened")                                        
         #if caseDetails is defined
         else:                                                               
@@ -221,10 +224,11 @@ class mainFrame(wx.Frame):
             #   Multi-Threading   #     #https://www.tutorialspoint.com/python3/python_multithreading.htm  
             #---------------------#
 
-            _thread.start_new_thread(self.onAddEvidencePcapExtract, (evidencePath, openFileDialog,) )
+            #_thread.start_new_thread(self.onAddEvidencePcapExtract, (evidencePath, openFileDialog,) )
             _thread.start_new_thread(self.onAddSessionsEvidence, (evidencePath, openFileDialog,) )
+            wx.MessageBox('PCAP Uploaded!' , ' ', wx.OK | wx.ICON_INFORMATION)
 
-        openFileDialog.Destroy() # close PCAP file
+        #openFileDialog.Destroy() # close PCAP file
 
              
     def onQuit(self, event):
@@ -255,7 +259,7 @@ class mainFrame(wx.Frame):
             stdout, stderr = process.communicate()
 
             #print out full path so that user knows exactly where the directory is
-            print("Report successfully made in " +creaderpath)
+            print("Report successfully made in " +creaderpath) 
 
 
     def on_md5_hash(self, event):
@@ -570,7 +574,7 @@ class mainFrame(wx.Frame):
         #close database connection
         addEvidenceDbConn.close()
         #close PCAP file BUT there's an error "RuntimeError: wrapped C/C++ object of type FileDialog has been deleted"
-        openFileDialog.Destroy() 
+        #openFileDialog.Destroy() 
         
         #status = OK
         return True 
@@ -670,7 +674,7 @@ class mainFrame(wx.Frame):
         print ("\nSessions extraction finished.\n")
 
         addEvidenceDbConn.close()
-        openFileDialog.Destroy() # close PCAP file
+        #openFileDialog.Destroy() # close PCAP file
         
         return True # status = OK
         #lock.release()
@@ -690,7 +694,7 @@ class mainFrame(wx.Frame):
     #   Aui Tab Functions   #
     #-----------------------#
     def checkOpenedTab(self, tabName):                     
-        global openTabs
+        #global openTabs
 
         #check if tab is opened in aui
         openedTab = set(openTabs)
@@ -961,7 +965,7 @@ class mainFrame(wx.Frame):
 
 
     def onAuiClose(self, event):
-        global openTabs
+        #global openTabs
         
         temp = event.GetSelection()
         tabName = self.auiNotebook.GetPageText(temp)
