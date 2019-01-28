@@ -52,9 +52,8 @@ class mainmenu(wx.Dialog):
         # end wxGlade
 
     def onBtnHarddiskExtraction(self, event):  # wxGlade: mainmenu.<event_handler>
-        #os.system('python mainHD.py')
-        print("Event handler 'onBtnMobileExtraction' not implemented!")
-        event.Skip()
+        os.system('python mainHD.py')
+        
 
     def onBtnMobileExtraction(self, event):  # wxGlade: mainmenu.<event_handler>
         print("Event handler 'onBtnMobileExtraction' not implemented!")
