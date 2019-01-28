@@ -969,7 +969,7 @@ class mainFrame(wx.Frame):
         
         temp = event.GetSelection()
         tabName = self.auiNotebook.GetPageText(temp)
-        self.auiNotebook.RemovePage(temp)
+        #self.auiNotebook.RemovePage(temp)
         print("Closing " + tabName + " tab")
         openTabs.remove(tabName)                    #remove closed tab from openTabs
         # TODO work out how to refresh the tab which was in the background
