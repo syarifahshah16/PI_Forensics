@@ -5,11 +5,9 @@
 #
 
 import wx
-import datetime
-from datetime import timedelta
+
 import connectdb
 import subprocess
-import os
 import time
 import re
 
@@ -21,8 +19,8 @@ import re
 
 notebookTab = ''
 
-class searchTabPanel(wx.Panel):
-    def __init__(self, parent, searchResults, caseDirectory):
+class TabPanel(wx.Panel):
+    def __init__(self, parent, name, caseDir):
         # begin wxGlade: MyFrame.__init__
         wx.Panel.__init__(self, parent=parent, id=wx.ID_ANY)
         
@@ -55,13 +53,20 @@ class searchTabPanel(wx.Panel):
         self.__set_properties()
         self.__do_layout()
 
-        self.load_queried_files(searchResults)
-        self.caseDirectory = caseDirectory
+        global caseDirectory, auiPageName
+        caseDirectory = caseDir
+        auiPageName = name
+
+        self.load_queried_files(self.list_ctrl)
+        
         # end wxGlade
 
 
     def __set_properties(self):
         # begin wxGlade: MyFrame.__set_properties
+        self.list_ctrl.AppendColumn("File Type", format=wx.LIST_FORMAT_LEFT, width=-1)
+        self.list_ctrl.AppendColumn("Status", format=wx.LIST_FORMAT_LEFT, width=-1)
+        self.list_ctrl.AppendColumn("Inode", format=wx.LIST_FORMAT_LEFT, width=-1)
         self.list_ctrl.AppendColumn("Filename", format=wx.LIST_FORMAT_LEFT, width=200)
         self.list_ctrl.AppendColumn("Last File Change", format=wx.LIST_FORMAT_LEFT, width=-1)
         self.list_ctrl.AppendColumn("Date/Time Created", format=wx.LIST_FORMAT_LEFT, width=-1)
@@ -69,10 +74,7 @@ class searchTabPanel(wx.Panel):
         self.list_ctrl.AppendColumn("Last Modified Time", format=wx.LIST_FORMAT_LEFT, width=-1)
         self.list_ctrl.AppendColumn("Uid", format=wx.LIST_FORMAT_LEFT, width=-1)
         self.list_ctrl.AppendColumn("Gid", format=wx.LIST_FORMAT_LEFT, width=-1)
-        self.list_ctrl.AppendColumn("MD5", format=wx.LIST_FORMAT_LEFT, width=-1)
         self.list_ctrl.AppendColumn("Size", format=wx.LIST_FORMAT_LEFT, width=-1)
-        self.list_ctrl.AppendColumn("Parent Path", format=wx.LIST_FORMAT_LEFT, width=-1)
-        self.list_ctrl.AppendColumn("Extension", format=wx.LIST_FORMAT_LEFT, width=-1)
         self.list_ctrl.AppendColumn("Image", format=wx.LIST_FORMAT_LEFT, width=-1)
 
         self.window_1.SetMinimumPaneSize(20)
@@ -98,7 +100,6 @@ class searchTabPanel(wx.Panel):
         self.notebook_pane_Image.SetSizer(sizer_12)
         sizer_9.Add(self.text_ctrl_IndexText, 1, wx.ALL | wx.EXPAND, 0)
         self.notebook_pane_IndexText.SetSizer(sizer_9)
-        
         sizer_11.Add(self.text_ctrl_FileMetadata, 1, wx.ALL | wx.EXPAND, 0)
         self.notebook_pane_FileMetadata.SetSizer(sizer_11)
         self.notebook.AddPage(self.notebook_pane_Hex, "Hex")
@@ -124,20 +125,16 @@ class searchTabPanel(wx.Panel):
         print("Page changed " + notebookTab)
 
     def onListItemSel(self, event):
-
         sel = self.list_ctrl.GetFocusedItem()
-        fileName = self.list_ctrl.GetItemText(sel, col=0) # get filename from col 0
-        parentPath = self.list_ctrl.GetItemText(sel, col=9)
-        filePath = parentPath+'/'+fileName
+        filePath = self.list_ctrl.GetItemText(sel, col=3)                   #get filepath of selected item from col 3
         image = self.list_ctrl.GetItemText(sel, col=11)
-        
 
         if notebookTab == "" or notebookTab == "Hex":
-            temp = subprocess.Popen(["xxd", self.caseDirectory+"/Extracted/"+image+"/"+filePath], stdout=subprocess.PIPE).communicate()[0]   #get hexdump of selected file
+            temp = subprocess.Popen(["xxd", caseDirectory+"/Extracted/"+image+"/"+filePath], stdout=subprocess.PIPE).communicate()[0]   #get hexdump of selected file
             self.text_ctrl_hex.SetValue(temp)                               #display return in txtctrl
 
         elif notebookTab == "Strings":
-            fullFilePath = self.caseDirectory+"/Extracted/"+image+"/"+filePath
+            fullFilePath = caseDirectory+"/Extracted/"+image+"/"+filePath
             regexfullFilePath = re.sub(r'[ ]', '\ ', fullFilePath)          #adds '\' infront of ' ', '$', '()' and '[]' to escape spaces in filepaths
             regexfullFilePath = re.sub(r'\$', '\$', regexfullFilePath)
             regexfullFilePath = re.sub(r'\(', '\(', regexfullFilePath)
@@ -155,45 +152,29 @@ class searchTabPanel(wx.Panel):
                     self.text_ctrl_String.SetValue(regex)                   #display in txtctrl
 
         elif notebookTab == "File metadata":
-            temp = subprocess.Popen(["exiftool", self.caseDirectory+"/Extracted/"+image+"/"+filePath], stdout=subprocess.PIPE).communicate()[0] #get exif data
+            temp = subprocess.Popen(["exiftool", caseDirectory+"/Extracted/"+image+"/"+filePath], stdout=subprocess.PIPE).communicate()[0] #get exif data
             self.text_ctrl_FileMetadata.SetValue(temp)
 
         elif notebookTab == "Image":
             if fileName.lower().endswith(('.png', '.jpg', '.jpeg', '.exif', '.tiff', '.gif', '.bmp', '.bpg')):
-                self.bitmap.SetBitmap(wx.Bitmap(self.caseDirectory+"/Extracted/"+image+"/"+filePath, wx.BITMAP_TYPE_ANY))                       #display image using bitmap if file extension matches
+                self.bitmap.SetBitmap(wx.Bitmap(caseDirectory+"/Extracted/"+image+"/"+filePath, wx.BITMAP_TYPE_ANY))                       #display image using bitmap if file extension matches
 
         elif notebookTab == "Index Text":
-            if Path(self.caseDirectory+"/Extracted/"+image+"/"+filePath).is_file():
+            if Path(caseDirectory+"/Extracted/"+image+"/"+filePath).is_file():
                 if fileName.lower().endswith(('.txt', '.rtf')):                     
-                    f = open(self.caseDirectory+"/Extracted/"+image+"/"+filePath, "r")   #read selected file
+                    f = open(caseDirectory+"/Extracted/"+image+"/"+filePath, "r")   #read selected file
                     self.text_ctrl_IndexText.SetValue(f.read())                     #display in txtctrl
-                    f.close() 
+                    f.close()
 
-    def load_queried_files(self, searchResults):
-        for x in searchResults:
-            if x[2] != "NULL":
-                    ctime = datetime.datetime(1970, 1, 1) + timedelta(seconds=x[2])
-            else:
-                ctime = x[2]
-                    
-            if x[3] != "NULL":
-                crtime = datetime.datetime(1970, 1, 1) + timedelta(seconds=x[3])
-            else:
-                crtime = x[3]
-
-            if x[4] != "NULL":
-                atime = datetime.datetime(1970, 1, 1) + timedelta(seconds=x[4])
-            else:
-                atime = x[4]
-
-            if x[5] != "NULL":
-                mtime = datetime.datetime(1970, 1, 1) + timedelta(seconds=x[5])
-            else:
-                mtime = x[5]
-
-            self.list_ctrl.Append((x[0], ctime, crtime, atime, mtime, x[6], x[7], x[8], x[1], x[9], x[10], x[11]))
-
-
+    def load_queried_files(self, list_ctrl):
+        if Path(caseDirectory+"/Evidence_Database/Deleted_Files.db").is_file():     #check if Deleted_Files.db exist
+            deletedFilesDb = caseDirectory+"/Evidence_Database/Deleted_Files.db"
+            conn = connectdb.create_connection(deletedFilesDb)                      #connect to Deleted_Files.db
+            query = connectdb.select_deleted_files(conn)                            #get all deleted files
+            
+            for x in query:
+                self.list_ctrl.Append((x[0], x[1], x[2], x[3], x[4], x[5], x[6], x[7], x[8], x[9], x[10], x[11]))   #add all to listctrl
+    
         #event.skip()
         # end wxGlade
 
