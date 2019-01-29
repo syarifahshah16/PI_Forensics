@@ -53,12 +53,8 @@ class mainFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.onQuit, id=item.GetId())
         self.frame_menubar.Append(wxglade_tmp_menu, "File")
         wxglade_tmp_menu = wx.Menu()
-        item = wxglade_tmp_menu.Append(wx.ID_ANY, "Clear GUI", "")
-        self.Bind(wx.EVT_MENU, self.onClearGUI, id=item.GetId())
         item = wxglade_tmp_menu.Append(wx.ID_ANY, "Process HTML Report", "")
         self.Bind(wx.EVT_MENU, self.on_html_report, id=item.GetId())
-        item = wxglade_tmp_menu.Append(wx.ID_ANY, "Process PCAP Hash", "")
-        self.Bind(wx.EVT_MENU, self.on_md5_hash, id=item.GetId())
         self.frame_menubar.Append(wxglade_tmp_menu, "Tools")
         self.SetMenuBar(self.frame_menubar)
 
@@ -175,7 +171,7 @@ class mainFrame(wx.Frame):
         #get path selected in filedialog
         caseDbPath  = openFileDialog.GetPath()                              
         
-        global caseDetails
+        global caseDetails, evidenceDetails
         try:
             #try to connect to case database and get case and evidence details
             self.conn = connectdb.create_connection(caseDbPath)
@@ -216,6 +212,20 @@ class mainFrame(wx.Frame):
             #get the filename of the pcap
             fileName = os.path.basename(evidencePath)
 
+            #insert evidence info into db
+            addEvidenceDbConn = connectdb.create_connection(caseDbPath)
+            with addEvidenceDbConn:
+                md5_hash = hashlib.md5()
+                f = open(evidencePath, 'rb')
+                # Read and update hash in chunks of 4K
+                for byte_block in iter(lambda: f.read(4096),b""):
+                    md5_hash.update(byte_block)
+                print(md5_hash.hexdigest())
+                evidenceMd5 = md5_hash.hexdigest()
+                insertEvidence = (1, fileName, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), evidenceMd5, evidencePath)
+                connectdb.insertEvidenceDetails(addEvidenceDbConn, insertEvidence)   #insert to EvidenceInfo in case database
+
+
             #create loading dialog
             self._dialog = wx.ProgressDialog("Loading", "Uploading PCAP", 100)  
             LoadingDialog(self._dialog)
@@ -227,6 +237,14 @@ class mainFrame(wx.Frame):
             #_thread.start_new_thread(self.onAddEvidencePcapExtract, (evidencePath, openFileDialog,) )
             _thread.start_new_thread(self.onAddSessionsEvidence, (evidencePath, openFileDialog,) )
             wx.MessageBox('PCAP Uploaded!' , ' ', wx.OK | wx.ICON_INFORMATION)
+
+
+        global evidenceDetails
+        addEvidenceDbConn = connectdb.create_connection(caseDbPath)
+        evidenceDetails = connectdb.select_evidence_details(addEvidenceDbConn)
+        self.addAuiTab("Summary", evidenceDetails)                  
+        self.recreateTree(caseDbPath)
+
 
         #openFileDialog.Destroy() # close PCAP file
 
@@ -243,7 +261,12 @@ class mainFrame(wx.Frame):
         self.Destroy()
 
     def on_html_report(self, event):  
-        global evidencePath
+        global EP
+        addEvidenceDbConn = connectdb.create_connection(caseDbPath)
+        getpath = connectdb.select_evidence_details(addEvidenceDbConn)
+        for i in getpath:
+            EP = i[5]
+        print("Evidence Path: " +EP)
         directoryfiledialog = wx.DirDialog (None, "Choose directory", "",
                                 wx.DD_DEFAULT_STYLE | wx.DD_DIR_MUST_EXIST)
         if directoryfiledialog.ShowModal() == wx.ID_OK:
@@ -251,29 +274,16 @@ class mainFrame(wx.Frame):
             creaderpath = directoryfiledialog.GetPath()                         
             #get directory name
             directoryname = directoryfiledialog.GetPath()     
-
-            print(directoryname)
+            
+            print("Creating report in " +directoryname)
             #run the chaosreader cmd
-            crd = ['chaosreader', evidencePath, '--dir', directoryname]             
+            crd = ['chaosreader', str(EP), '--dir', directoryname]             
             process = Popen(crd, stdout=PIPE, stderr=PIPE)
             stdout, stderr = process.communicate()
 
             #print out full path so that user knows exactly where the directory is
             print("Report successfully made in " +creaderpath) 
 
-
-    def on_md5_hash(self, event):
-        global evidencePath   
-        md5_hash = hashlib.md5()
-        print(evidencePath)
-        f = open(evidencePath, 'rb')
-        # Read and update hash in chunks of 4K
-        for byte_block in iter(lambda: f.read(4096),b""):
-            md5_hash.update(byte_block)
-        print(md5_hash.hexdigest())
-        pcapMD5 = md5_hash.hexdigest()
-
-        wx.MessageBox('MD5 HASH: ' +pcapMD5 , 'MD5 HASH', wx.OK | wx.ICON_INFORMATION)
             
     #-------------------------------#
     #   End of Menu Tab Functions   #
