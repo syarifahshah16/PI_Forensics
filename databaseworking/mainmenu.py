@@ -60,7 +60,7 @@ class mainmenu(wx.Dialog):
         event.Skip()
 
     def onBtnNetworkAnalysis(self, event):  # wxGlade: mainmenu.<event_handler>
-        os.system('python main.py')
+        os.system('python mainPCAP.py')
  
 
 # end of class mainmenu
