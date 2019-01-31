@@ -42,7 +42,7 @@ def insertCaseDetails(conn, details):
     return cur.lastrowid
 
 def insertEvidenceDetails(conn, details):
-    sql = ''' INSERT INTO EvidenceInfo(CaseID, EvidenceName, EvidenceDbPath, EvidenceDatetime, Md5)
+    sql = ''' INSERT INTO EvidenceInfo(CaseID, EvidenceName, EvidenceDatetime, Md5, EvidencePath)
               VALUES(?,?,?,?,?) '''
     cur = conn.cursor()
     cur.execute(sql, details)
@@ -99,6 +99,12 @@ def select_case_details(conn):
 def select_evidence_details(conn):
     cur = conn.cursor()
     cur.execute("SELECT * FROM EvidenceInfo")
+    rows = cur.fetchall()
+    return rows
+
+def select_evidencepath(conn):
+    cur = conn.cursor()
+    cur.execute("SELECT EvidencePath FROM EvidenceInfo")
     rows = cur.fetchall()
     return rows
 
