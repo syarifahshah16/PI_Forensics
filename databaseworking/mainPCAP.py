@@ -222,7 +222,13 @@ class mainFrame(wx.Frame):
                     md5_hash.update(byte_block)
                 print(md5_hash.hexdigest())
                 evidenceMd5 = md5_hash.hexdigest()
-                insertEvidence = (1, fileName, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), evidenceMd5, evidencePath)
+
+                #get the pcap size
+                pcapsize = os.path.getsize(evidencePath)
+                print(pcapsize)
+
+                #insert all the evidence details into the db
+                insertEvidence = (1, fileName, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), evidenceMd5, evidencePath, pcapsize)
                 connectdb.insertEvidenceDetails(addEvidenceDbConn, insertEvidence)   #insert to EvidenceInfo in case database
 
 
