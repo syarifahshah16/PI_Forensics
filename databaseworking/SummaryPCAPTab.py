@@ -85,22 +85,13 @@ class SummaryTabPanel(wx.Panel):
         for x in evidenceDetails:
             evidenceAddDate = x[3]
 
+        global evidenceAddHash
+        for x in evidenceDetails:
+            evidenceAddHash = x[4]
+
 
         evidenceCount = 0
-        for x in evidenceInfo:
-            global imageInfo
-            try:
-                conn = connectdb.create_connection(x[2])                #connect to tsk database
-                imageInfo = connectdb.select_image_info(conn)           #get evidence name, size and md5 from tsk database
-            except:
-                pass
-
-            for i in imageInfo:
-                    i = list(i)
-                    fileName = os.path.basename(i[0])
-                    self.addEvidence(evidenceMainSizer, fileName, i[1], x[4])       #sets the evidence along with the details on the top panel
-                    evidenceCount += 1
-
+        evidenceCount += 1
         lblEvidenceCount.SetLabel(str(evidenceCount))
 
         self.panel_2.SetSizer(evidenceMainSizer)
@@ -154,9 +145,8 @@ class SummaryTabPanel(wx.Panel):
         self.Layout()
         # end wxGlade
 
-    def addEvidence(self, mainSizer, imgName, imgSize, imgMd5):
-        self.text_ctrl1 = wx.TextCtrl(self.panel_2, wx.ID_ANY, str(imgMd5), style=wx.TE_READONLY | wx.BORDER_NONE)
-        self.text_ctrl2 = wx.TextCtrl(self.panel_2, wx.ID_ANY, "{imgSize} bytes".format(imgSize=imgSize), style=wx.TE_READONLY | wx.BORDER_NONE)
+        self.text_ctrl1 = wx.TextCtrl(self.panel_2, wx.ID_ANY, evidenceAddHash, style=wx.TE_READONLY | wx.BORDER_NONE)
+        self.text_ctrl2 = wx.TextCtrl(self.panel_2, wx.ID_ANY, style=wx.TE_READONLY | wx.BORDER_NONE)
         self.text_ctrl3 = wx.TextCtrl(self.panel_2, wx.ID_ANY, evidenceAddDate, style=wx.TE_READONLY | wx.BORDER_NONE)
         
 
@@ -171,21 +161,17 @@ class SummaryTabPanel(wx.Panel):
         gridSizer.Add((30, 28), 0, 0, 0)
         gridSizer.Add((0, 0), 0, 0, 0)
 
-        lblMd5 = wx.StaticText(self.panel_2, wx.ID_ANY, "HDD Md5 Hash:")
+        lblMd5 = wx.StaticText(self.panel_2, wx.ID_ANY, "PCAP Md5 Hash:")
         infoSizer.Add(lblMd5, 0, wx.ALL, 5)
         infoSizer.Add(self.text_ctrl1, 0, wx.BOTTOM | wx.EXPAND | wx.LEFT | wx.RIGHT, 5)
-        lblSize = wx.StaticText(self.panel_2, wx.ID_ANY, "HDD Evidence Size:")
+        lblSize = wx.StaticText(self.panel_2, wx.ID_ANY, "PCAP Evidence Size:")
         infoSizer.Add(lblSize, 0, wx.ALL, 5)
         infoSizer.Add(self.text_ctrl2, 0, wx.BOTTOM | wx.EXPAND | wx.LEFT | wx.RIGHT, 5)
         lblDateAdded = wx.StaticText(self.panel_2, wx.ID_ANY, "Date/Time added:")
         infoSizer.Add(lblDateAdded, 0, wx.ALL, 5)
         infoSizer.Add(self.text_ctrl3, 0, wx.BOTTOM | wx.EXPAND | wx.LEFT | wx.RIGHT, 5)
         gridSizer.Add(infoSizer, 1, wx.EXPAND, 0)
+        evidenceMainSizer.Add(gridSizer, 0, wx.BOTTOM | wx.EXPAND | wx.LEFT, 6)
 
-        
-        
-        mainSizer.Add(gridSizer, 0, wx.BOTTOM | wx.EXPAND | wx.LEFT, 6)
 
-    def addmd5(self, pcapMD5):
-        self.text_ctrl1.WriteText(pcapMD5)
 # end of class MyFrame
