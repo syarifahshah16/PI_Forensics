@@ -89,6 +89,10 @@ class SummaryTabPanel(wx.Panel):
         for x in evidenceDetails:
             evidenceAddHash = x[4]
 
+        global evidenceAddSize
+        for x in evidenceDetails:
+            evidenceAddSize = x[6]
+
 
         evidenceCount = 0
         evidenceCount += 1
@@ -146,7 +150,7 @@ class SummaryTabPanel(wx.Panel):
         # end wxGlade
 
         self.text_ctrl1 = wx.TextCtrl(self.panel_2, wx.ID_ANY, evidenceAddHash, style=wx.TE_READONLY | wx.BORDER_NONE)
-        self.text_ctrl2 = wx.TextCtrl(self.panel_2, wx.ID_ANY, style=wx.TE_READONLY | wx.BORDER_NONE)
+        self.text_ctrl2 = wx.TextCtrl(self.panel_2, wx.ID_ANY, evidenceAddSize +" bytes", style=wx.TE_READONLY | wx.BORDER_NONE)
         self.text_ctrl3 = wx.TextCtrl(self.panel_2, wx.ID_ANY, evidenceAddDate, style=wx.TE_READONLY | wx.BORDER_NONE)
         
 
