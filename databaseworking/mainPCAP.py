@@ -241,7 +241,8 @@ class mainFrame(wx.Frame):
             #---------------------#
 
             #_thread.start_new_thread(self.onAddEvidencePcapExtract, (evidencePath, openFileDialog,) )
-            _thread.start_new_thread(self.onAddSessionsEvidence, (evidencePath, openFileDialog,) )
+            #_thread.start_new_thread(self.onAddSessionsEvidence, (evidencePath, openFileDialog,) )
+            _thread.start_new_thread(self.onAddDNSEvidence, (evidencePath, openFileDialog,) )
             wx.MessageBox('PCAP Uploaded!' , ' ', wx.OK | wx.ICON_INFORMATION)
 
 
@@ -698,7 +699,101 @@ class mainFrame(wx.Frame):
     #-----------------------#
     #   TO BE ADDED LATER   #
     #-----------------------#
-    #def onAddDNSEvidence(self, evidencePath, openFileDialog):
+    def onAddDNSEvidence(self, evidencePath, openFileDialog):
+        global caseDbPath
+
+        if (None == caseDbPath):
+            print("Error: runFiles - global caseDbPath invalid!")
+            return False
+
+
+        #rb is for opening non-text files
+        f = open(evidencePath, 'rb')
+        pcap = dpkt.pcap.Reader(f)
+
+        # For each packet in the pcap process the contents
+        identifier = 0
+
+        addEvidenceDbConn = connectdb.create_connection(caseDbPath)
+        
+        dnsPreBufList = [];
+
+        for timestamp, buf in pcap:
+
+            try:
+                eth = dpkt.ethernet.Ethernet(buf)
+            except:
+                continue
+            if eth.type != 2048:
+                continue
+            #make sure we are dealing with UDP protocol
+            try:
+                ip = eth.data
+            except:
+                continue
+            if ip.p != 17:
+                continue
+            #filter on UDP assigned ports for DNS
+            try:
+                udp = ip.data
+            except:
+                continue
+            if udp.sport != 53 and udp.dport != 53:
+                continue
+            #make the dns object out of the udp data and
+            #check for it being a RR (answer) and for opcode QUERY
+            try:
+                dns = dpkt.dns.DNS(udp.data)
+            except:
+                continue
+            if dns.qr != dpkt.dns.DNS_R:
+                continue
+            if dns.opcode != dpkt.dns.DNS_QUERY:
+                continue
+            if dns.rcode != dpkt.dns.DNS_RCODE_NOERR:
+                continue
+            if len(dns.an) < 1:
+                continue
+            #process and print responses based on record type
+            #puling out the protocol
+            proto = ip.get_proto(ip.p).__name__
+
+            for answer in dns.an:
+                if answer.type == 1: #DNS_A
+                    self.evidenceDetails = 1 # flag that we've got evidence
+                    dnsPreBufList.append( (str(answer.name),  str(socket.inet_ntoa(answer.rdata)), str(proto) ) ) # list of tuples
+
+        # transfer data (tuples) from buffer to database
+        # http://specminor.org/2017/01/09/improve-sqlite-write-speed-python.html
+        numRows = len(dnsPreBufList)
+        #print("Rows: " + str(numRows))
+        for i in range (0, numRows, 20): # step size 10
+            cursor = addEvidenceDbConn.cursor()
+            cursor.execute("PRAGMA synchronous = OFF")
+            cursor.execute("BEGIN TRANSACTION")
+            for j in range (i, i + 20): # must be same value as for i step size above
+                if j >= numRows:
+                    break # from for-loop
+                    
+                r = dnsPreBufList[j] # row tuple
+
+                cursor.execute('''INSERT INTO dnsEvidenceTable(dns, response, protocol) VALUES(?,?,?)''',
+                       (r[0], r[1], r[2]))
+            
+            addEvidenceDbConn.commit()
+
+        print ("\nSessions extraction finished.\n")
+
+        addEvidenceDbConn.close()
+        #openFileDialog.Destroy() # close PCAP file
+        
+        return True # status = OK
+
+
+
+
+
+
     #def onAddCredentialsEvidence(self, evidencePath, openFileDialog):
 
 
