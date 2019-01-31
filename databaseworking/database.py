@@ -175,10 +175,10 @@ def selectSessionsEvidenceDetails(conn, id):
 #          NOT COMPLETED          #
 #---------------------------------#
 
-"""def createDNSEvidenceTable(conn):
+def createDNSEvidenceTable(conn):
     try:
         cursor = conn.cursor() # Get a cursor object
-        cursor.execute('''CREATE TABLE dnsEvidenceTable(id INTEGER PRIMARY KEY, Packet TEXT, timestamp TEXT, src_ip TEXT, dst_ip TEXT, request TEXT)''')
+        cursor.execute('''CREATE TABLE dnsEvidenceTable(id INTEGER PRIMARY KEY, dnsname TEXT, response TEXT, protocol TEXT)''')
         conn.commit()
         
     except Error as e:
@@ -187,12 +187,12 @@ def selectSessionsEvidenceDetails(conn, id):
 
 def selectDNSEvidenceDetails(conn, id):
     cursor = conn.cursor()
-    cursor.execute('''SELECT Packet, timestamp, src_ip, dst_ip, request FROM dnsEvidenceTable WHERE id=?''', (id,)) # note trailing comma as we're passing a tuple with a single value
+    cursor.execute('''SELECT dns, response, protocol FROM dnsEvidenceTable WHERE id=?''', (id,)) # note trailing comma as we're passing a tuple with a single value
     row = cursor.fetchone()
     return row
 
 
-def createCredentialsEvidenceTable(conn):
+"""def createCredentialsEvidenceTable(conn):
     try:
         cursor = conn.cursor() # Get a cursor object
         cursor.execute('''CREATE TABLE credentialsEvidenceTable(id INTEGER PRIMARY KEY, Packet TEXT, timestamp TEXT, src_ip TEXT, dst_ip TEXT, request TEXT)''')
