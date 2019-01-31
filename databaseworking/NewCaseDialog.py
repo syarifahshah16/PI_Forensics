@@ -127,7 +127,7 @@ class newCase(wx.Dialog):
             else:
                 conn = connectdb.create_connection(dbFilePath) #creates db file and connection if it does not exist
                 caseInfoTable = "CREATE TABLE 'CaseInfo' ( 'CaseID' INTEGER PRIMARY KEY AUTOINCREMENT, 'InvestigatorName' TEXT, 'CaseNum' INTEGER, 'CaseName' TEXT, 'CaseFolder' TEXT, 'CaseDb' TEXT, 'CaseDesc' TEXT, 'Datetime' TEXT);"
-                evidenceInfoTable = "CREATE TABLE 'EvidenceInfo' ('CaseID' INTEGER, 'EvidenceName' TEXT, 'EvidenceDbPath' TEXT, 'EvidenceDatetime' TEXT, 'Md5' TEXT);"
+                evidenceInfoTable = "CREATE TABLE 'EvidenceInfo' ('CaseID' INTEGER, 'EvidenceName' TEXT, 'EvidenceDbPath' TEXT, 'EvidenceDatetime' TEXT, 'Md5' TEXT, 'EvidencePath' TEXT);"
                 bookmarksTable = "CREATE TABLE 'Bookmarks' ('fileName' TEXT, 'ctime' TEXT, 'crtime' TEXT, 'atime' TEXT, 'mtime' TEXT, 'uid' INTEGER, 'gid' INTEGER, 'md5' TEXT, 'size' INTEGER, 'parentPath' TEXT, 'extension' TEXT, 'image' TEXT);"
                 connectdb.createTable(conn, caseInfoTable)      #creates CaseInfo table
                 connectdb.createTable(conn, evidenceInfoTable)  #creates EvidenceInfo table
