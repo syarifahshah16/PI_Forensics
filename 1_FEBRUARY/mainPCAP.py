@@ -765,11 +765,14 @@ class mainFrame(wx.Frame):
             #process and print responses based on record type
             #puling out the protocol
             proto = ip.get_proto(ip.p).__name__
+            
+            for qname in dns.qd:    #dns query
+                dnsquery = qname.name
 
-            for answer in dns.an:
+            for answer in dns.an:   #dns response
                 if answer.type == 1:
                     self.evidenceDetails = 1 # flag that we've got evidence
-                    dnsPreBufList.append( (str(answer.name), str(socket.inet_ntoa(answer.rdata)), str(proto) ) ) # list of tuples
+                    dnsPreBufList.append( (str(dnsquery), str(answer.name), str(socket.inet_ntoa(answer.rdata)), str(proto) ) ) # list of tuples
 
         # transfer data (tuples) from buffer to database
         # http://specminor.org/2017/01/09/improve-sqlite-write-speed-python.html
@@ -785,8 +788,8 @@ class mainFrame(wx.Frame):
                     
                 r = dnsPreBufList[j] # row tuple
 
-                cursor.execute('''INSERT INTO dnsEvidenceTable(dns, response, protocol) VALUES(?,?,?)''',
-                       (r[0], r[1], r[2]))
+                cursor.execute('''INSERT INTO dnsEvidenceTable(dnsquery, dnsresponse, ipresponse, protocol) VALUES(?,?,?,?)''',
+                       (r[0], r[1], r[2], r[3]))
             
             addEvidenceDbConn.commit()
 
