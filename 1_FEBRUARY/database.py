@@ -144,7 +144,7 @@ def selectSessionsEvidenceDetails(conn, id):
 def createDNSEvidenceTable(conn):
     try:
         cursor = conn.cursor() # Get a cursor object
-        cursor.execute('''CREATE TABLE dnsEvidenceTable(id INTEGER PRIMARY KEY, dns TEXT, response TEXT, protocol TEXT)''')
+        cursor.execute('''CREATE TABLE dnsEvidenceTable(id INTEGER PRIMARY KEY, dnsquery TEXT, dnsresponse TEXT, ipresponse TEXT, protocol TEXT)''')
         conn.commit()
         
     except Error as e:
@@ -153,7 +153,7 @@ def createDNSEvidenceTable(conn):
 
 def selectDNSEvidenceDetails(conn, id):
     cursor = conn.cursor()
-    cursor.execute('''SELECT dns, response, protocol FROM dnsEvidenceTable WHERE id=?''', (id,)) 
+    cursor.execute('''SELECT dnsquery, dnsresponse, ipresponse, protocol FROM dnsEvidenceTable WHERE id=?''', (id,)) 
     row = cursor.fetchone()
     return row
 
