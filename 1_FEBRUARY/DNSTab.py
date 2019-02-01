@@ -20,7 +20,8 @@ class DNSTabPanel(wx.Panel):
 
     def __set_properties(self):
         # begin wxGlade: MyDialog.__set_properties
-        self.dnslist.AppendTextColumn("DNS", width=193)
+        self.dnslist.AppendTextColumn("DNS Query", width=193)
+        self.dnslist.AppendTextColumn("DNS Response", width=193)
         self.dnslist.AppendTextColumn("IP Response", width=193)
         self.dnslist.AppendTextColumn("Protocol", width=193)
         # end wxGlade
