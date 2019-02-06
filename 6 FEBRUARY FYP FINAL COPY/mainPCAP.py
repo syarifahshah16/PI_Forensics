@@ -80,7 +80,7 @@ class mainFrame(wx.Frame):
         self.Bind(wx.aui.EVT_AUINOTEBOOK_PAGE_CLOSE, self.onAuiClose, self.auiNotebook)
 
         #properties
-        self.SetTitle("Forensic Pi")
+        self.SetTitle("Pi Forensic")
         self.tree_ctrl_1.SetBackgroundColour(wx.Colour(240, 240, 240))
         self.windowLeftPanel.SetMinSize((180, -1))
         self.windowRightPanel.SetMinSize((980, -1))
