@@ -47,7 +47,7 @@ class SummaryTabPanel(wx.Panel):
         # begin wxGlade: MyFrame.__set_properties
         self.panel_2.SetScrollRate(10, 10)
         self.txtCaseDb.SetBackgroundColour(wx.Colour(229, 229, 229))
-        self.txtCaseDesc.SetMinSize((100, 100))
+        self.txtCaseDesc.SetMinSize((200, 200))
         self.txtCaseDesc.SetBackgroundColour(wx.Colour(229, 229, 229))
         # end wxGlade
 
