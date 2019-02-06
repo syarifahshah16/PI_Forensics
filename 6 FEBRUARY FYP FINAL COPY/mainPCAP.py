@@ -1036,10 +1036,10 @@ class mainFrame(wx.Frame):
             identifier = identifier + 1
             idStr = "\nPacket identifier: " + str(identifier)
 
-            protocol  = ""
+            protocol  = "HTTP Cookie"
             username  = ""
             password  = "N/A"
-            vlogin    = "N/A"
+            vlogin    = "Unknown"
             timestamp = ""
             
             #pasing packet data to dpkt's Ethernet class + decode eth object
@@ -1105,6 +1105,13 @@ class mainFrame(wx.Frame):
                     if (80 == int(dst_port)) and (len(tcp.data) > 0): # if HTTP
                         try:      
                             http = dpkt.http.Request(tcp.data)
+                            host = http.headers['host'] if 'host' in http.headers else None
+                            dst_host_str = dst_host_str + " [" + str(host) + "]"
+
+                            #user_agent field to get machine name + operating system
+                            user_agent = http.headers['user-agent'] if 'user-agent' in http.headers else None
+                            src_host_str = src_host_str + " [" + str(user_agent) + "]"
+                            protocol = protocol + (http.headers['transfer-encoding'] if 'transfer-encoding' in http.headers else "")
                             
                         except Exception:
                             print(idStr)
@@ -1585,4 +1592,5 @@ if __name__ == "__main__":
         forensicPi.MainLoop()
     else:
         print("Error in __main__")
+
 
